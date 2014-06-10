@@ -142,7 +142,6 @@
 						afterRevert();
 
 					function afterRevert(){
-						$target.element.removeClass('sv-candidate');
 						$placeholder.remove();
 						$helper.remove();
 						$original.removeClass('ng-hide');
@@ -152,10 +151,9 @@
 						options = void 0;
 						$helper = void 0;
 						$original = void 0;
-						$target = void 0;
-
 						
 						if($target){
+							$target.element.removeClass('sv-candidate');
 							var spliced = originatingPart.model(originatingPart.scope).splice(index, 1);
 							var targetIndex = ($target.view === originatingPart && $target.targetIndex > index) ?
 								$target.targetIndex - 1 : $target.targetIndex;
@@ -163,6 +161,8 @@
 							$target.view.model($target.view.scope).splice(targetIndex, 0, spliced[0]);
 							if(!$scope.$root.$$phase) $scope.$apply();
 						}
+						
+						$target = void 0;
 					}
 				};
 
