@@ -308,9 +308,11 @@
 						x: e.clientX - clientRect.left,
 						y: e.clientY - clientRect.top
 					};
+					html.addClass('sv-sorting-in-progress');
 					html.on('mousemove', onMousemove).on('mouseup', function mouseup(e){
 						html.off('mousemove', onMousemove);
 						html.off('mouseup', mouseup);
+						html.removeClass('sv-sorting-in-progress');
 						$controllers[0].$drop($scope.$index);
 					});
 
@@ -352,6 +354,12 @@
 		'}' +
 		'.sv-placeholder{' +
 			'opacity: 0;' +
+		'}' +
+		'.sv-sorting-in-progress{' +
+			'-webkit-user-select: none;' +
+			'-moz-user-select: none;' +
+			'-ms-user-select: none;' +
+			'user-select: none;' +
 		'}' +
 		'</style>'
 	].join(''));
