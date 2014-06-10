@@ -15,6 +15,8 @@
 		var ROOTS_MAP = Object.create(null);
 		// window.ROOTS_MAP = ROOTS_MAP;
 
+		var sortingInProgress;
+
 		return {
 			restrict: 'A',
 			controller: ['$scope', '$attrs', '$interpolate', function($scope, $attrs, $interpolate){
@@ -36,6 +38,10 @@
 				var $original; // original element
 				var $target; // last best candidate
 				var isGrid = false;
+
+				this.sortingInProgress = function(){
+					return sortingInProgress;
+				};
 
 				// check if at least one of the lists have a grid like layout
 				$scope.$watchCollection(function(){
@@ -67,6 +73,7 @@
 					});
 				});
 				this.$moveUpdate = function(opts, mouse, svElement, svOriginal){
+					sortingInProgress = true;
 					candidates = [];
 					if(!$placeholder){
 						var svRect = svElement[0].getBoundingClientRect();
@@ -167,6 +174,7 @@
 						afterRevert();
 
 					function afterRevert(){
+						sortingInProgress = false;
 						$placeholder.remove();
 						$helper.remove();
 						$original.removeClass('ng-hide');
@@ -316,6 +324,7 @@
 				var html = angular.element(document.documentElement);
 				
 				function onMousedown(e){
+					if($controllers[1].sortingInProgress()) return;
 					if(e.button != 0) return;
 
 					var opts = $parse($attrs.svElement)($scope);
@@ -369,6 +378,8 @@
 						html.removeClass('sv-sorting-in-progress');
 						$controllers[0].$drop($scope.$index, opts);
 					});
+
+					$controllers[1].$moveUpdate(opts, {x: e.clientX, y: e.clientY}, clone, $element);
 
 					function onMousemove(e){
 						// ----- move the element
