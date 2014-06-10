@@ -139,6 +139,20 @@
 		.list li{
 			margin-top: 10px;
 		}
+		.helper-left, .helper-right{
+			width: 200px;
+			height: 30px;
+			border-radius: 3px;
+			text-align: center;
+		}
+		.helper-left{
+			border: 1px solid crimson;
+			background-color: hsl(120, 100%, 90%);
+		}
+		.helper-right{
+			border: 1px solid teal;
+			background-color: hsl(0, 100%, 90%);
+		}
 	</style>
 	<script>
 		function getArray(size, prefix){
@@ -150,7 +164,7 @@
 			return arr;
 		}
 		function AppController($scope, $location){
-			$scope.tab = 5;
+			$scope.tab = 6;
 			$scope.$watch(function(){
 				return $location.search();
 			}, function(obj){
@@ -171,7 +185,9 @@
 					getArray(8, '6.'),
 					getArray(8, '7.'),
 					getArray(0, '8.'),	
-				]
+				],
+				items6: getArray(10, '9.'),
+				items7: getArray(7, '10.')
 			};
 			$scope.containmentChange = function(val){
 				this.opts.containment = val ? '.sortable-container' : 'html';
@@ -277,7 +293,8 @@
 		  <li ng-class="{active: tab == 2}"><a ng-click="tab = 2">Multi sortable</a></li>
 		  <li ng-class="{active: tab == 3}"><a ng-click="tab = 3">Grid with handles</a></li>
 		  <li ng-class="{active: tab == 4}"><a ng-click="tab = 4">Multiple multi sortables</a></li>
-		  <li ng-class="{active: tab == 5}"><a ng-click="tab = 5">About</a></li>
+		  <li ng-class="{active: tab == 5}"><a ng-click="tab = 5">Custom helpers</a></li>
+		  <li ng-class="{active: tab == 6}"><a ng-click="tab = 6">About</a></li>
 		</ul>
 		<div ng-if="tab == 1" ng-init="opts = {}; conainmentChange(false)">
 			<h3>
@@ -400,7 +417,44 @@
 				</div>
 			</div>
 		</div>
-		<div ng-if="tab == 5" highlight-after-digest>
+		<div ng-if="tab == 5">
+			<h3>
+				Custom helpers
+			</h3>
+			<p>
+				This example shows the usage of <a href="https://github.com/kamilkp/angular-sortable-view">angular-sortable-view</a> with custom helpers
+			</p>
+			<div class="row">
+				<div class="col-xs-6">
+					<div sv-root class="multi-sortable">
+						<div class="sortable-container" sv-part="data.items6">
+							<div sv-helper class="helper-left">
+								custom left helper
+							</div>
+							<div ng-repeat="item in data.items6" sv-element class="well multi">
+								{{item}}
+							</div>
+						</div>
+						<div class="sortable-container" sv-part="data.items7">
+							<div ng-repeat="item in data.items7" sv-element class="well multi">
+								<div sv-helper class="helper-right">
+									custom right helper {{$index}}
+								</div>
+								{{item}}
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="col-xs-6">
+					<h4>HTML:</h4>
+					<pre class="prettyprint" highlight-on-load="example2Source"></pre>
+					<h4>Model:</h4>
+					<pre class="prettyprint lang-js color-white" ng-bind="printArray(data.items6)"></pre>
+					<pre class="prettyprint lang-js color-white" ng-bind="printArray(data.items7)"></pre>
+				</div>
+			</div>
+		</div>
+		<div ng-if="tab == 6" highlight-after-digest>
 			<h3>About</h3>
 			<p>
 				This is a simple library written as a module for <a href="https://github.com/angular/angular.js">AngularJS</a> for sorting elements in the UI. It supports both single elements list, and multiple connected lists, where an element can be moved from one to another.

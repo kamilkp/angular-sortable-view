@@ -85,6 +85,7 @@
 						});
 						svOriginal.after($placeholder);
 						svOriginal.addClass('ng-hide');
+						svOriginal.removeClass('sv-visibility-hidden');
 
 						// cache options, helper and original element reference
 						$original = svOriginal;
@@ -120,7 +121,7 @@
 					var pRect = $placeholder[0].getBoundingClientRect();
 					var pCenter = {
 						x: ~~(pRect.left + pRect.width/2),
-						y: ~~(pRect.top + pRect.height/2)	
+						y: ~~(pRect.top + pRect.height/2)
 					};
 					candidates.push({
 						q: (pCenter.x - mouse.x)*(pCenter.x - mouse.x) + (pCenter.y - mouse.y)*(pCenter.y - mouse.y),
@@ -252,6 +253,7 @@
 				this.$drop = function(index, options){
 					$scope.$sortableRoot.$drop($scope.part, index, options);
 				};
+				$scope.$ctrl = this;
 			}],
 			scope: true,
 			compile: function($element, $attrs){
@@ -265,7 +267,7 @@
 							id: $scope.$id,
 							element: $element,
 							model: model,
-							scope: $scope
+							scope: $scope,
 						};
 						$scope.$sortableRoot = $sortable;
 
@@ -320,6 +322,13 @@
 					}
 				});
 
+				var helper;
+				$scope.$watch('$ctrl.helper', function(customHelper){
+					if(customHelper){
+						helper = customHelper;
+					}
+				});
+
 				var body = angular.element(document.body);
 				var html = angular.element(document.documentElement);
 				
@@ -340,12 +349,27 @@
 
 					var target = $element;
 					var clientRect = $element[0].getBoundingClientRect();
-					var clone = target.clone();
-					clone.addClass('sv-helper').css({
-						'left': clientRect.left + document.body.scrollLeft + 'px',
-						'top': clientRect.top + document.body.scrollTop + 'px',
-						'width': clientRect.width + 'px'
-					});
+					var clone;
+					
+					if(!helper) helper = $controllers[0].helper;
+					if(helper){
+						clone = helper.clone();
+						clone.removeClass('ng-hide');
+						clone.css({
+							'left': clientRect.left + document.body.scrollLeft + 'px',
+							'top': clientRect.top + document.body.scrollTop + 'px'
+						});
+						target.addClass('sv-visibility-hidden');
+					}
+					else{
+						clone = target.clone();
+						clone.addClass('sv-helper').css({
+							'left': clientRect.left + document.body.scrollLeft + 'px',
+							'top': clientRect.top + document.body.scrollTop + 'px',
+							'width': clientRect.width + 'px'
+						});
+					}
+
 					body.append(clone);
 					clone[0].reposition = function(coords, absolute){
 						var leftPx = absolute ? 0 : +this.style.left.slice(0, -2);
@@ -361,7 +385,7 @@
 							if(targetLeft < containmentRect.left + document.body.scrollLeft) // left boundary
 								targetLeft = containmentRect.left + document.body.scrollLeft;
 							if(targetLeft + clientRect.width > containmentRect.left + document.body.scrollLeft + containmentRect.width) // right boundary
-								targetLeft = containmentRect.left + document.body.scrollLeft + containmentRect.width - clientRect.width;	
+								targetLeft = containmentRect.left + document.body.scrollLeft + containmentRect.width - clientRect.width;
 						}
 						this.style.left = targetLeft + 'px';
 						this.style.top = targetTop + 'px';
@@ -406,6 +430,21 @@
 		};
 	});
 
+	module.directive('svHelper', function(){
+		return {
+			require: ['?^svPart', '?^svElement'],
+			link: function($scope, $element, $attrs, $ctrl){
+				$element.addClass('sv-helper').addClass('ng-hide');
+				if($ctrl[1])
+					$ctrl[1].helper = $element;
+				else if($ctrl[0])
+					$ctrl[0].helper = $element;
+				else
+					throw 'svHelper is not nested inside svPart or svElement';
+			}
+		};
+	});
+
 	angular.element(document.head).append([
 		'<style>' +
 		'.sv-helper{' +
@@ -424,6 +463,9 @@
 			'-moz-user-select: none;' +
 			'-ms-user-select: none;' +
 			'user-select: none;' +
+		'}' +
+		'.sv-visibility-hidden{' +
+			'visibility: hidden;' +
 		'}' +
 		'</style>'
 	].join(''));
