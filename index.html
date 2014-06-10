@@ -60,6 +60,7 @@
 		pre{
 			font-size: 12px;
 			tab-size: 4;
+			margin-left: 0 !important;
 		}
 		.well{
 			padding-top: 8px;
@@ -70,7 +71,7 @@
 			position: relative;
 			top: -2px;
 		}
-		li{
+		.nav li{
 			cursor: pointer;
 		}
 		.color-white{
@@ -85,6 +86,14 @@
 			float: left;
 			height: 100%;
 			padding: 10px 10px;
+		}
+		.multi-multi-sortable .sortable-container{
+			width: 22%;
+			margin: 0 1%;
+			float: left;
+			height: 100%;
+			padding: 10px 10px;
+			overflow-x: hidden;
 		}
 		.multi{
 			display: inline-block;
@@ -122,10 +131,13 @@
 			color: white;
 			background: black;
 			box-shadow: 0 0 3px gray inset;
-			padding: 5px 10px;
+			padding: 2px 10px;
 			border-radius: 4px;
 			font-size: 12px;
 			white-space: nowrap;
+		}
+		.list li{
+			margin-top: 10px;
 		}
 	</style>
 	<script>
@@ -153,7 +165,13 @@
 				items1: getArray(20, '1.'),
 				items2: getArray(20, '2.'),
 				items3: getArray(6, '3.'),
-				items4: getArray(20, '4.')
+				items4: getArray(20, '4.'),
+				items5: [
+					getArray(8, '5.'),
+					getArray(8, '6.'),
+					getArray(8, '7.'),
+					getArray(8, '8.'),	
+				]
 			};
 			$scope.containmentChange = function(val){
 				this.opts.containment = val ? '.sortable-container' : 'html';
@@ -184,6 +202,13 @@
 									'		<span sv-handle>handle</span>\n' +
 									'	</div>\n' +
 									'</div>';
+			$scope.example4Source = '<div class="multi-multi-sortable" ng-repeat="foo in [0, 1, 2, 3]">\n' +
+									'	<div class="sortable-container" sv-root="multiple_{{$odd}}" sv-part="data.items5[$index]">\n' +
+									'		<div ng-repeat="item in data.items5[$index]" sv-element class="well multi">\n' +
+									'			{{item}}\n' +
+									'		</div>\n' +
+									'	</div>\n' +
+									'</div>\n';
 			$scope.aboutExample1 =  '<div sv-root sv-part="modelArray">\n' +
 									'	<div ng-repeat="item in modelArray" sv-element>\n' +
 									'		<div>{{item}}</div>\n' +
@@ -201,7 +226,19 @@
 									'		</div>\n' +
 									'	</div>\n' +
 									'</div>';
-			$scope.aboutExample3 =  '<div sv-root sv-part="modelArray">\n' +
+			$scope.aboutExample3 =  '<div>\n' +
+									'	<div sv-root="someUniqueId" sv-part="modelArray1">\n' +
+									'		<div ng-repeat="item in modelArray1" sv-element>\n' +
+									'			<div>{{item}}</div>\n' +
+									'		</div>\n' +
+									'	</div>\n' +
+									'	<div sv-root="someUniqueId" sv-part="modelArray2">\n' +
+									'		<div ng-repeat="item in modelArray2" sv-element>\n' +
+									'			<div>{{item}}</div>\n' +
+									'		</div>\n' +
+									'	</div>\n' +
+									'</div>';
+			$scope.aboutExample4 =  '<div sv-root sv-part="modelArray">\n' +
 									'	<div ng-repeat="item in modelArray" sv-element>\n' +
 									'		<div>{{item}}</div>\n' +
 									'		<span sv-handle>handle</span>\n' +
@@ -231,7 +268,7 @@
 <body ng-controller="AppController">
 	<a href="https://github.com/kamilkp/angular-sortable-view"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/365986a132ccd6a44c23a9169022c0b5c890c387/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f7265645f6161303030302e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_red_aa0000.png" /></a>
 	<h1>
-		Angular-sortable-view
+		angular-sortable-view
 		<small>angular (multi)sortable - no jQuery nor jQueryUI required</small>
 	</h1>
 	<div class="row">
@@ -239,14 +276,15 @@
 		  <li ng-class="{active: tab == 1}"><a ng-click="tab = 1">Single sortable</a></li>
 		  <li ng-class="{active: tab == 2}"><a ng-click="tab = 2">Multi sortable</a></li>
 		  <li ng-class="{active: tab == 3}"><a ng-click="tab = 3">Grid with handles</a></li>
-		  <li ng-class="{active: tab == 4}"><a ng-click="tab = 4">About</a></li>
+		  <li ng-class="{active: tab == 4}"><a ng-click="tab = 4">Multiple multi sortables</a></li>
+		  <li ng-class="{active: tab == 5}"><a ng-click="tab = 5">About</a></li>
 		</ul>
 		<div ng-if="tab == 1" ng-init="opts = {}; conainmentChange(false)">
 			<h3>
 				Single sortable container
 			</h3>
 			<p>
-				This example shows the basic usage of <a href="https://github.com/kamilkp/angular-sortable-view">Angular-sortable-view</a>
+				This example shows the basic usage of <a href="https://github.com/kamilkp/angular-sortable-view">angular-sortable-view</a>
 			</p>
 			<p>
 				The html consits of a single ng-repeat'ed list of elements. Try dragging one of them into the target position
@@ -276,7 +314,7 @@
 				Multiple sortable containers
 			</h3>
 			<p>
-				This example shows the usage of <a href="https://github.com/kamilkp/angular-sortable-view">Angular-sortable-view</a> with multiple sortable lists. Each item can be moved either within its list or between them.
+				This example shows the usage of <a href="https://github.com/kamilkp/angular-sortable-view">angular-sortable-view</a> with multiple sortable lists. Each item can be moved either within its list or between them.
 			</p>
 			<div class="row">
 				<div class="col-xs-6">
@@ -307,7 +345,7 @@
 				Float-based grid sortable with optional handles
 			</h3>
 			<p>
-				This example shows the usage of <a href="https://github.com/kamilkp/angular-sortable-view">Angular-sortable-view</a> with float-based grid.
+				This example shows the usage of <a href="https://github.com/kamilkp/angular-sortable-view">angular-sortable-view</a> with float-based grid.
 			</p>
 			<div class="row">
 				<div class="col-xs-6">
@@ -330,24 +368,69 @@
 				</div>
 			</div>
 		</div>
-		<div ng-if="tab == 4" highlight-after-digest>
+		<div ng-if="tab == 4">
+			<h3>
+				Multiple multi-sortable lists
+			</h3>
+			<p>
+				This example shows the usage of <a href="https://github.com/kamilkp/angular-sortable-view">angular-sortable-view</a> with multiple multi-sortable lists. <b>The first column is connected with the third</b>, and <b>the second is connected with the fourth</b>.
+			</p>
+			<p>
+				In order to connect sortable roots (elements with <span class="syntax">sv-root</span> attribute) you need to provide the value of the <span class="syntax">sv-root</span> attribute. It will be an identifier that groups them together. If no value for this attribute is provided then only parts (elements with <span class="syntax">sv-part</span> attribute) with the common <span class="syntax">sv-root</span> ancestor will be connected with each other. In case of this example the groups are identified by two identifiers: <span class="syntax">multiple_false</span> and <span class="syntax">multiple_true</span> (it just takes advantage of the <span class="syntax">ngRepeat</span>'s inner <span class="syntax">$odd</span> property that alternates between true and false).
+			</p>
+			<br>
+			<div class="row">
+				<div class="col-xs-6">
+					<div class="multi-multi-sortable" ng-repeat="foo in [0, 1, 2, 3]">
+						<div class="sortable-container" sv-root="multiple_{{$odd}}" sv-part="data.items5[$index]">
+							<div ng-repeat="item in data.items5[$index]" sv-element class="well multi">
+								{{item}}
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="col-xs-6">
+					<h4>HTML:</h4>
+					<pre class="prettyprint" highlight-on-load="example4Source"></pre>
+					<h4>Model:</h4>
+					<pre class="prettyprint lang-js color-white" ng-bind="printArray(data.items5[0])"></pre>
+					<pre class="prettyprint lang-js color-white" ng-bind="printArray(data.items5[1])"></pre>
+					<pre class="prettyprint lang-js color-white" ng-bind="printArray(data.items5[2])"></pre>
+					<pre class="prettyprint lang-js color-white" ng-bind="printArray(data.items5[3])"></pre>
+				</div>
+			</div>
+		</div>
+		<div ng-if="tab == 5" highlight-after-digest>
 			<h3>About</h3>
 			<p>
 				This is a simple library written as a module for <a href="https://github.com/angular/angular.js">AngularJS</a> for sorting elements in the UI. It supports both single elements list, and multiple connected lists, where an element can be moved from one to another.
 			</p>
 			<p>
-				This library requires <b>no dependencies whatsoever</b> (except angular.js of course), so <b>you no longer need to include jQuery and jQueryUI and angularUI</b> which altogether gives the size of around <b class="danger">340kB minified!</b>. Whereas the <a href="https://github.com/kamilkp/angular-sortable-view">Angular-sortable-view</a> is only <b class="success">5kB minified!</b>
+				This library requires <b>no dependencies whatsoever</b> (except angular.js of course), so <b>you no longer need to include jQuery and jQueryUI and angularUI</b> which altogether gives the size of around <b class="danger">340kB minified!</b>. Whereas the <a href="https://github.com/kamilkp/angular-sortable-view">angular-sortable-view</a> is only <b class="success">5kB minified!</b>
+			</p>
+			<h3>API</h3>
+			<p>
+				The API is declarative. There are four directives (hooked on attributes) that need to be nested properly:
+				<ul class="list">
+					<li><span class="syntax">sv-root</span></li>this is where all the logic is happening. If multiple lists should be connected with each other so that elements can be moved between them and they have a common ancestor, put this attribute on that element. If not and you still want the multi-sortable behaviour a value for that attribue must be provided. That value will be used as an identifier to connect those roots together.
+					<li><span class="syntax">sv-part</span></li>this attribute should be placed on an element that is a container for the <span class="syntax">ngRepeat</span>'ed elements. Its value should be the same as the right hand side expression in <span class="syntax">ng-repeat</span> attribute.
+					<li><span class="syntax">sv-element</span></li>this attribute should be placed on the same element as <span class="syntax">ng-repeat</span> attribute. Its (optional) value should be an expression that evaluates to the options object.
+					<li><span class="syntax">sv-handle</span></li>this attribute is optional. If needed it can be placed on an element within the sortable element. This element will be the handle for sorting operations.
+				</ul>
+				<!-- So if you need to specity a handle for sortables just place a <span class="syntax">sv-handle</span> attribue on the given element.  -->
 			</p>
 			<p>
-				The API is declarative. So if you need to specity a handle for sortables just place a <span class="syntax">sv-handle</span> attribue on the given element. See the examples below:
+				See the examples below:
 			</p>
 			<p>
 				<h4>Example of single sortable list</h4>
 				<pre class="prettyprint" ng-bind="aboutExample1"></pre>
-				<h4>Example of multiple sortable lists</h4>
+				<h4>Example of multiple sortable lists with common ancestor</h4>
 				<pre class="prettyprint" ng-bind="aboutExample2"></pre>
-				<h4>Using handles</h4>
+				<h4>Example of multiple sortable lists without common ancestor</h4>
 				<pre class="prettyprint" ng-bind="aboutExample3"></pre>
+				<h4>Example of using handles</h4>
+				<pre class="prettyprint" ng-bind="aboutExample4"></pre>
 			</p>
 		</div>
 	</div>
