@@ -126,22 +126,20 @@
 				};
 
 				this.$drop = function(originatingPart, index){
-					if($target){
-						if(options.revert){
-							var placeholderRect = $placeholder[0].getBoundingClientRect();
-							['-webkit-', '-moz-', '-ms-', '-o-', ''].forEach(function(prefix){
-								if(typeof $helper[0].style[prefix + 'transition'] !== "undefined")
-									$helper[0].style[prefix + 'transition'] = 'all ' + options.revert + 'ms ease';
-							});
-							setTimeout(afterRevert, +options.revert);
-							$helper.css({
-								'top': placeholderRect.top + document.body.scrollTop + 'px',
-								'left': placeholderRect.left + document.body.scrollLeft + 'px'
-							});
-						}
-						else
-							afterRevert();
+					if(options.revert){
+						var placeholderRect = $placeholder[0].getBoundingClientRect();
+						['-webkit-', '-moz-', '-ms-', '-o-', ''].forEach(function(prefix){
+							if(typeof $helper[0].style[prefix + 'transition'] !== "undefined")
+								$helper[0].style[prefix + 'transition'] = 'all ' + options.revert + 'ms ease';
+						});
+						setTimeout(afterRevert, +options.revert);
+						$helper.css({
+							'top': placeholderRect.top + document.body.scrollTop + 'px',
+							'left': placeholderRect.left + document.body.scrollLeft + 'px'
+						});
 					}
+					else
+						afterRevert();
 
 					function afterRevert(){
 						$target.element.removeClass('sv-candidate');
@@ -149,19 +147,22 @@
 						$helper.remove();
 						$original.removeClass('ng-hide');
 
-						var spliced = originatingPart.model(originatingPart.scope).splice(index, 1);
-						var targetIndex = ($target.view === originatingPart && $target.targetIndex > index) ?
-							$target.targetIndex - 1 : $target.targetIndex;
-
-						if($target.after) targetIndex++;
-						$target.view.model($target.view.scope).splice(targetIndex, 0, spliced[0]);
 						candidates = void 0;
 						$placeholder = void 0;
 						options = void 0;
 						$helper = void 0;
 						$original = void 0;
 						$target = void 0;
-						if(!$scope.$root.$$phase) $scope.$apply();
+
+						
+						if($target){
+							var spliced = originatingPart.model(originatingPart.scope).splice(index, 1);
+							var targetIndex = ($target.view === originatingPart && $target.targetIndex > index) ?
+								$target.targetIndex - 1 : $target.targetIndex;
+							if($target.after) targetIndex++;
+							$target.view.model($target.view.scope).splice(targetIndex, 0, spliced[0]);
+							if(!$scope.$root.$$phase) $scope.$apply();
+						}
 					}
 				};
 
