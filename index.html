@@ -1,79 +1,359 @@
 <!DOCTYPE html>
-<html>
+<html ng-app="app">
+<head>
+	<title>Angular-sortable</title>
+	<link rel="stylesheet" type="text/css" href="http://netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
+	<script type="text/javascript" src="lib/angular.js"></script>
+	<script type="text/javascript" src="src/angular-sortable-view.js"></script>
+	<script src="https://google-code-prettify.googlecode.com/svn/loader/run_prettify.js?autoload=false&skin=sunburst"></script>
+	<style>
+/*		body{
+			height: 140%;
+		}*/
+		.container{
+			width: 100%;
+			height: 80%;
+		}
+		.left{
+			float: left;
+			height: 100%;
+			width: 50%;
+			padding: 30px;
+			box-sizing: border-box;
+			background-color: hsl(0, 20%, 50%);
+		}
+		.right{
+			float: left;
+			height: 100%;
+			width: 50%;
+			padding: 30px;
+			box-sizing: border-box;
+			background-color: hsl(120, 20%, 50%);
+		}
+		.repeater{
+			background-color: cyan;
+			height: 30px;
+			margin-bottom: 20px;
+		}
+		.repeater span{
+			background-color: white;
+		}
 
-  <head>
-    <meta charset='utf-8' />
-    <meta http-equiv="X-UA-Compatible" content="chrome=1" />
-    <meta name="description" content="angular-sortable-view : Simple (multi)sortable view for AngularJS. No jQuery nor jQueryUI required" />
+		html{
+			min-height: 100%;
+		}
+		body{
+			padding: 20px 50px;
+			min-height: 100%;
+			-moz-box-sizing: border-box;
+			box-sizing: border-box;
+			-webkit-user-select: none;
+			-moz-user-select: none;
+			-ms-user-select: none;
+			user-select: none;
+		}
+		h1{
+			margin-bottom: 50px;
+		}
+		.sortable-container{
+			max-height: 400px;
+			overflow: auto;
+			padding: 10px 50px;
+			background: hsl(60, 80%, 90%);
+		}
+		pre{
+			font-size: 10px;
+			tab-size: 4;
+		}
+		.well{
+			padding-top: 8px;
+			padding-bottom: 8px;
+			margin-bottom: 5px;
+		}
+		input[type="checkbox"]{
+			position: relative;
+			top: -2px;
+		}
+		li{
+			cursor: pointer;
+		}
+		.color-white{
+			color: white;
+		}
+		.multi-sortable{
+			height: 400px;
+		}
+		.multi-sortable .sortable-container{
+			width: 46%;
+			margin: 0 2%;
+			float: left;
+			height: 100%;
+			padding: 10px 10px;
+		}
+		.multi{
+			display: inline-block;
+			width: 90%;
+		}
+		.grid{
+			float: left;
+			width: 100px;
+			height: 100px;
+			margin-right: 5px;
+		}
+		.sortable-container.grid{
+			width: 100%;
+			height: 400px;
+		}
+		span[sv-handle]{
+			position: relative;
+			bottom: -35px;
+			-webkit-transform: translateX(-50%);
+			transform: translateX(-50%);
+			cursor: move;
+			padding: 5px 10px;
+			border-radius: 4px;
+			background-color: black;
+			color: white;
+			box-shadow: 0 0 3px gray inset;
+		}
+		.danger{
+			color: crimson;
+		}
+		.success{
+			color: hsl(120, 40%, 50%);
+		}
+		span.syntax{
+			color: white;
+			background: black;
+			box-shadow: 0 0 3px gray inset;
+			padding: 5px 10px;
+			border-radius: 4px;
+			font-size: 12px;
+			white-space: nowrap;
+		}
+	</style>
+	<script>
+		function getArray(size, prefix){
+			var arr = [];
+			prefix = prefix || '';
+			for(var i=0;i<size;i++){
+				arr.push(prefix + i);
+			}
+			return arr;
+		}
+		function AppController($scope, $location){
+			$scope.tab = 4;
+			$scope.$watch(function(){
+				return $location.search();
+			}, function(obj){
+				if(obj.tab)
+					$scope.tab = obj.tab + '';
+			}, true);
 
-    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
-
-    <title>angular-sortable-view</title>
-  </head>
-
-  <body>
-
-    <!-- HEADER -->
-    <div id="header_wrap" class="outer">
-        <header class="inner">
-          <a id="forkme_banner" href="https://github.com/kamilkp/angular-sortable-view">View on GitHub</a>
-
-          <h1 id="project_title">angular-sortable-view</h1>
-          <h2 id="project_tagline">Simple (multi)sortable view for AngularJS. No jQuery nor jQueryUI required</h2>
-
-            <section id="downloads">
-              <a class="zip_download_link" href="https://github.com/kamilkp/angular-sortable-view/zipball/master">Download this project as a .zip file</a>
-              <a class="tar_download_link" href="https://github.com/kamilkp/angular-sortable-view/tarball/master">Download this project as a tar.gz file</a>
-            </section>
-        </header>
-    </div>
-
-    <!-- MAIN CONTENT -->
-    <div id="main_content_wrap" class="outer">
-      <section id="main_content" class="inner">
-        <h3>
-<a name="welcome-to-github-pages" class="anchor" href="#welcome-to-github-pages"><span class="octicon octicon-link"></span></a>Welcome to GitHub Pages.</h3>
-
-<p>This automatic page generator is the easiest way to create beautiful pages for all of your projects. Author your page content here using GitHub Flavored Markdown, select a template crafted by a designer, and publish. After your page is generated, you can check out the new branch:</p>
-
-<pre><code>$ cd your_repo_root/repo_name
-$ git fetch origin
-$ git checkout gh-pages
-</code></pre>
-
-<p>If you're using the GitHub for Mac, simply sync your repository and you'll see the new branch.</p>
-
-<h3>
-<a name="designer-templates" class="anchor" href="#designer-templates"><span class="octicon octicon-link"></span></a>Designer Templates</h3>
-
-<p>We've crafted some handsome templates for you to use. Go ahead and continue to layouts to browse through them. You can easily go back to edit your page before publishing. After publishing your page, you can revisit the page generator and switch to another theme. Your Page content will be preserved if it remained markdown format.</p>
-
-<h3>
-<a name="rather-drive-stick" class="anchor" href="#rather-drive-stick"><span class="octicon octicon-link"></span></a>Rather Drive Stick?</h3>
-
-<p>If you prefer to not use the automatic generator, push a branch named <code>gh-pages</code> to your repository to create a page manually. In addition to supporting regular HTML content, GitHub Pages support Jekyll, a simple, blog aware static site generator written by our own Tom Preston-Werner. Jekyll makes it easy to create site-wide headers and footers without having to copy them across every page. It also offers intelligent blog support and other advanced templating features.</p>
-
-<h3>
-<a name="authors-and-contributors" class="anchor" href="#authors-and-contributors"><span class="octicon octicon-link"></span></a>Authors and Contributors</h3>
-
-<p>You can <a href="https://github.com/blog/821" class="user-mention">@mention</a> a GitHub username to generate a link to their profile. The resulting <code>&lt;a&gt;</code> element will link to the contributor's GitHub Profile. For example: In 2007, Chris Wanstrath (<a href="https://github.com/defunkt" class="user-mention">@defunkt</a>), PJ Hyett (<a href="https://github.com/pjhyett" class="user-mention">@pjhyett</a>), and Tom Preston-Werner (<a href="https://github.com/mojombo" class="user-mention">@mojombo</a>) founded GitHub.</p>
-
-<h3>
-<a name="support-or-contact" class="anchor" href="#support-or-contact"><span class="octicon octicon-link"></span></a>Support or Contact</h3>
-
-<p>Having trouble with Pages? Check out the documentation at <a href="http://help.github.com/pages">http://help.github.com/pages</a> or contact <a href="mailto:support@github.com">support@github.com</a> and we’ll help you sort it out.</p>
-      </section>
-    </div>
-
-    <!-- FOOTER  -->
-    <div id="footer_wrap" class="outer">
-      <footer class="inner">
-        <p class="copyright">angular-sortable-view maintained by <a href="https://github.com/kamilkp">kamilkp</a></p>
-        <p>Published with <a href="http://pages.github.com">GitHub Pages</a></p>
-      </footer>
-    </div>
-
-    
-
-  </body>
+			$scope.$watch('tab', function(tab){
+				$location.search({tab: tab});
+			});
+			$scope.data = {
+				items1: getArray(20, '1.'),
+				items2: getArray(20, '2.'),
+				items3: getArray(6, '3.'),
+				items4: getArray(20, '4.')
+			};
+			$scope.containmentChange = function(val){
+				this.opts.containment = val ? '.sortable-container' : 'html';
+			};
+			$scope.printArray = function(arr){
+				return '[' + arr.toString().replace(/([^,]+)/g, '"$1"').replace(/,/g, ', ') + ']';
+			};
+			$scope.example1Source = '<div class="sortable-container" sv-root sv-part="data.items1">\n' +
+									'	<div ng-repeat="item in data.items1" sv-element="opts" class="well">\n' +
+									'		{{item}}\n' +
+									'	</div>\n' +
+									'</div>';
+			$scope.example2Source = '<div sv-root class="multi-sortable">\n' +
+									'	<div class="sortable-container" sv-part="data.items2">\n' +
+									'		<div ng-repeat="item in data.items2" sv-element class="well multi">\n' +
+									'			{{item}}\n' +
+									'		</div>\n' +
+									'	</div>\n' +
+									'	<div class="sortable-container" sv-part="data.items3">\n' +
+									'		<div ng-repeat="item in data.items3" sv-element class="well multi">\n' +
+									'			{{item}}\n' +
+									'		</div>\n' +
+									'	</div>\n' +
+									'</div>';
+			$scope.example3Source = '<div class="sortable-container grid" sv-root sv-part="data.items4">\n' +
+									'	<div ng-repeat="item in data.items4" sv-element="opts" class="well grid">\n' +
+									'		{{item}}\n' +
+									'		<span sv-handle>handle</span>\n' +
+									'	</div>\n' +
+									'</div>';
+			$scope.aboutExample1 =  '<div sv-root sv-part="modelArray">\n' +
+									'	<div ng-repeat="item in modelArray" sv-element>\n' +
+									'		<div>{{item}}</div>\n' +
+									'	</div>\n' +
+									'</div>';
+			$scope.aboutExample2 =  '<div sv-root>\n' +
+									'	<div sv-part="modelArray1">\n' +
+									'		<div ng-repeat="item in modelArray1" sv-element>\n' +
+									'			<div>{{item}}</div>\n' +
+									'		</div>\n' +
+									'	</div>\n' +
+									'	<div sv-part="modelArray2">\n' +
+									'		<div ng-repeat="item in modelArray2" sv-element>\n' +
+									'			<div>{{item}}</div>\n' +
+									'		</div>\n' +
+									'	</div>\n' +
+									'</div>';
+			$scope.aboutExample3 =  '<div sv-root sv-part="modelArray">\n' +
+									'	<div ng-repeat="item in modelArray" sv-element>\n' +
+									'		<div>{{item}}</div>\n' +
+									'		<span sv-handle>handle</span>\n' +
+									'	</div>\n' +
+									'</div>';
+		}
+		angular.module('app', ['sortableView']).
+			directive('highlightOnLoad', function($parse){
+				return {
+					compile: function($element, $attrs){
+						return function($scope, $element, $attrs){
+							$element.text($parse($attrs.highlightOnLoad)($scope));
+							PR.prettyPrint();
+						};
+					}
+				};
+			}).
+			directive('highlightAfterDigest', function($parse){
+				return function($scope, $element, $attrs){
+					$scope.$$postDigest(function(){
+						PR.prettyPrint();
+					});
+				};
+			});
+	</script>
+</head>
+<body ng-controller="AppController">
+	<a href="https://github.com/kamilkp/angular-sortable-view"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/365986a132ccd6a44c23a9169022c0b5c890c387/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f7265645f6161303030302e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_red_aa0000.png" /></a>
+	<h1>
+		Angular-sortable
+		<small>angular (multi)sortable - no jQuery nor jQueryUI required</small>
+	</h1>
+	<div class="row">
+		<ul class="nav nav-tabs" style="margin-bottom: 5px;">
+		  <li ng-class="{active: tab == 1}"><a ng-click="tab = 1">Single sortable</a></li>
+		  <li ng-class="{active: tab == 2}"><a ng-click="tab = 2">Multi sortable</a></li>
+		  <li ng-class="{active: tab == 3}"><a ng-click="tab = 3">Grid with handles</a></li>
+		  <li ng-class="{active: tab == 4}"><a ng-click="tab = 4">About</a></li>
+		</ul>
+		<div ng-if="tab == 1" ng-init="opts = {}; conainmentChange(false)">
+			<h3>
+				Single sortable container
+			</h3>
+			<p>
+				This example shows the basic usage of <a href="https://github.com/kamilkp/angular-sortable-view">Angular-sortable-view</a>
+			</p>
+			<p>
+				The html consits of a single ng-repeat'ed list of elements. Try dragging one of them into the target position
+			</p>
+			<div class="row">
+				<div class="col-xs-5">
+					<label style="margin-bottom: 10px;">
+						<input type="checkbox" ng-model="containmentFlag" ng-change="containmentChange(containmentFlag)"/>
+						Contain sorting to yellow container
+					</label>
+					<div class="sortable-container" sv-root sv-part="data.items1">
+						<div ng-repeat="item in data.items1" sv-element="opts" class="well">
+							{{item}}
+						</div>
+					</div>
+				</div>
+				<div class="col-xs-7">
+					<h4>HTML:</h4>
+					<pre class="prettyprint" highlight-on-load="example1Source"></pre>
+					<h4>Model:</h4>
+					<pre class="prettyprint lang-js color-white" ng-bind="printArray(data.items1)"></pre>
+				</div>
+			</div>
+		</div>
+		<div ng-if="tab == 2">
+			<h3>
+				Multiple sortable containers
+			</h3>
+			<p>
+				This example shows the usage of <a href="https://github.com/kamilkp/angular-sortable-view">Angular-sortable-view</a> with multiple sortable lists. Each item can be moved either within its list or between them.
+			</p>
+			<div class="row">
+				<div class="col-xs-6">
+					<div sv-root class="multi-sortable">
+						<div class="sortable-container" sv-part="data.items2">
+							<div ng-repeat="item in data.items2" sv-element class="well multi">
+								{{item}}
+							</div>
+						</div>
+						<div class="sortable-container" sv-part="data.items3">
+							<div ng-repeat="item in data.items3" sv-element class="well multi">
+								{{item}}
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="col-xs-6">
+					<h4>HTML:</h4>
+					<pre class="prettyprint" highlight-on-load="example2Source"></pre>
+					<h4>Model:</h4>
+					<pre class="prettyprint lang-js color-white" ng-bind="printArray(data.items2)"></pre>
+					<pre class="prettyprint lang-js color-white" ng-bind="printArray(data.items3)"></pre>
+				</div>
+			</div>
+		</div>
+		<div ng-if="tab == 3" ng-init="opts = {}; conainmentChange(false)">
+			<h3>
+				Float-based grid sortable with optional handles
+			</h3>
+			<p>
+				This example shows the usage of <a href="https://github.com/kamilkp/angular-sortable-view">Angular-sortable-view</a> with float-based grid.
+			</p>
+			<div class="row">
+				<div class="col-xs-6">
+					<label style="margin-bottom: 10px;">
+						<input type="checkbox" ng-model="containmentFlag" ng-change="containmentChange(containmentFlag)"/>
+						Contain sorting to yellow container
+					</label>
+					<div class="sortable-container grid" sv-root sv-part="data.items4">
+						<div ng-repeat="item in data.items4" sv-element="opts" class="well grid">
+							{{item}}
+							<span sv-handle>handle</span>
+						</div>
+					</div>
+				</div>
+				<div class="col-xs-6">
+					<h4>HTML:</h4>
+					<pre class="prettyprint" highlight-on-load="example3Source"></pre>
+					<h4>Model:</h4>
+					<pre class="prettyprint lang-js color-white" ng-bind="printArray(data.items4)"></pre>
+				</div>
+			</div>
+		</div>
+		<div ng-if="tab == 4" highlight-after-digest>
+			<h3>About</h3>
+			<p>
+				This is a simple library written as a module for <a href="https://github.com/angular/angular.js">AngularJS</a> for sorting elements in the UI. It supports both single elements list, and multiple connected lists, where an element can be moved from one to another.
+			</p>
+			<p>
+				This library requires <b>no dependencies whatsoever</b> (except angular.js of course), so <b>you no longer need to include jQuery and jQueryUI and angularUI</b> which altogether gives the size of around <b class="danger">340kB minified!</b>. Whereas the <a href="https://github.com/kamilkp/angular-sortable-view">Angular-sortable-view</a> is only <b class="success">5kB minified!</b>
+			</p>
+			<p>
+				The API is declarative. So if you need to specity a handle for sortables just place a <span class="syntax">sv-handle</span> attribue on the given element. See the examples below:
+			</p>
+			<p>
+				<h4>Example of single sortable list</h4>
+				<pre class="prettyprint" ng-bind="aboutExample1"></pre>
+				<h4>Example of multiple sortable lists</h4>
+				<pre class="prettyprint" ng-bind="aboutExample2"></pre>
+				<h4>Using handles</h4>
+				<pre class="prettyprint" ng-bind="aboutExample3"></pre>
+			</p>
+		</div>
+	</div>
+</body>
 </html>
