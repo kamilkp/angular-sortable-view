@@ -12,12 +12,24 @@
 				return elem.y - pointer.y < 0;
 		}
 
+		var ROOTS_MAP = Object.create(null);
+		// window.ROOTS_MAP = ROOTS_MAP;
+
 		return {
-			restrict: 'EA',
-			controller: ['$scope', function($scope){
+			restrict: 'A',
+			controller: ['$scope', '$attrs', '$interpolate', function($scope, $attrs, $interpolate){
+				function getSortableElements(key){
+					// return that.$sortableElements;
+					return ROOTS_MAP[key];
+				}
+				function removeSortableElements(key){
+					delete ROOTS_MAP[key];
+				}
+
+				var mapKey = $interpolate($attrs.svRoot)($scope) || $scope.$id;
+				if(!ROOTS_MAP[mapKey]) ROOTS_MAP[mapKey] = [];
+
 				var that = this;
-				this.$connectedViews = [];
-				this.$sortableElements = [];
 				var candidates; // set of possible destinations
 				var $placeholder; // placeholder element
 				var options; // sortable options
@@ -28,7 +40,7 @@
 
 				// check if at least one of the lists have a grid like layout
 				$scope.$watchCollection(function(){
-					return that.$sortableElements;
+					return getSortableElements(mapKey);
 				}, function(collection){
 					isGrid = false;
 					var array = collection.map(function(item){
@@ -73,7 +85,7 @@
 						options = opts;
 						$helper = svElement;
 					}
-					that.$sortableElements.forEach(function(se, index){
+					getSortableElements(mapKey).forEach(function(se, index){
 						var rect = se.element[0].getBoundingClientRect();
 						var center = {
 							x: ~~(rect.left + rect.width/2),
@@ -125,7 +137,7 @@
 					});
 				};
 
-				this.$drop = function(originatingPart, index){
+				this.$drop = function(originatingPart, index, options){
 					if(options.revert){
 						var placeholderRect = $placeholder[0].getBoundingClientRect();
 						['-webkit-', '-moz-', '-ms-', '-o-', ''].forEach(function(prefix){
@@ -166,6 +178,19 @@
 					}
 				};
 
+				this.addToSortableElements = function(se){
+					getSortableElements(mapKey).push(se);
+				};
+				this.removeFromSortableElements = function(se){
+					var elems = getSortableElements(mapKey);
+					var index = elems.indexOf(se);
+					if(index > -1){
+						elems.splice(index, 1);
+						if(elems.length === 0)
+							removeSortableElements(mapKey);
+					}
+				};
+
 				var windowElement = angular.element(window);
 				windowElement.on('scroll', scrollHandler);
 				$scope.$on('$destroy', function(){
@@ -203,8 +228,8 @@
 				this.getPart = function(){
 					return $scope.part;
 				};
-				this.$drop = function(index){
-					$scope.$sortableRoot.$drop($scope.part, index);
+				this.$drop = function(index, options){
+					$scope.$sortableRoot.$drop($scope.part, index, options);
 				};
 			}],
 			scope: true,
@@ -221,7 +246,6 @@
 							model: model,
 							scope: $scope
 						};
-						$sortable.$connectedViews.push($scope.part);
 						$scope.$sortableRoot = $sortable;
 					},
 					post: function($scope, $element, $attrs, $sortable){
@@ -239,7 +263,7 @@
 				$scope.$ctrl = this;
 			}],
 			link: function($scope, $element, $attrs, $controllers){
-				$controllers[1].$sortableElements.push({
+				var sortableElement = {
 					element: $element,
 					getPart: function(){
 						return $controllers[0].getPart();
@@ -247,6 +271,10 @@
 					getIndex: function(){
 						return $scope.$index;
 					}
+				};
+				$controllers[1].addToSortableElements(sortableElement);
+				$scope.$on('$destroy', function(){
+					$controllers[1].removeFromSortableElements(sortableElement);
 				});
 
 				var handle = $element;
@@ -314,7 +342,7 @@
 						html.off('mousemove', onMousemove);
 						html.off('mouseup', mouseup);
 						html.removeClass('sv-sorting-in-progress');
-						$controllers[0].$drop($scope.$index);
+						$controllers[0].$drop($scope.$index, opts);
 					});
 
 					function onMousemove(e){

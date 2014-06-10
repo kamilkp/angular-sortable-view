@@ -13,7 +13,14 @@ This is a simple library written as a module for [AngularJS](https://github.com/
 
 This library requires ***no dependencies whatsoever*** (except angular.js of course), so ***you no longer need to include jQuery and jQueryUI and angularUI*** which altogether gives the size of around ***340kB minified***. Whereas the [angular-sortable-view](https://github.com/kamilkp/angular-sortable-view) is only ***5kB minified!***.
 
-The API is declarative. So if you need to specity a handle for sortables just place a `sv-handle` attribue on the given element. See the examples below:
+###API:
+
+The API is declarative. There are four directives (hooked on attributes) that need to be nested properly:
+
+  * `sv-root` - this is where all the logic is happening. If multiple lists should be connected with each other so that elements can be moved between them and they have a common ancestor, put this attribute on that element. If not and you still want the multi-sortable behaviour a value for that attribue must be provided. That value will be used as an identifier to connect those roots together.
+  * `sv-part` - this attribute should be placed on an element that is a container for the `ngRepeat`'ed elements. Its value should be the same as the right hand side expression in `ng-repeat` attribute.
+  * `sv-element` - this attribute should be placed on the same element as `ng-repeat` attribute. Its (optional) value should be an expression that evaluates to the options object.
+  * `sv-handle` - this attribute is optional. If needed it can be placed on an element within the sortable element. This element will be the handle for sorting operations.
 
 ###Example of single sortable list
 
@@ -25,7 +32,7 @@ The API is declarative. So if you need to specity a handle for sortables just pl
 </div>
 ```
 
-###Example of multiple sortable lists
+###Example of multiple sortable lists with common ancestor
 
 ```html
 <div sv-root>
@@ -42,7 +49,24 @@ The API is declarative. So if you need to specity a handle for sortables just pl
 </div>
 ```
 
-###Using handles
+###Example of multiple sortable lists without common ancestor
+
+```html
+<div>
+	<div sv-root="someUniqueId" sv-part="modelArray1">
+		<div ng-repeat="item in modelArray1" sv-element>
+			<div>{{item}}</div>
+		</div>
+	</div>
+	<div sv-root="someUniqueId" sv-part="modelArray2">
+		<div ng-repeat="item in modelArray2" sv-element>
+			<div>{{item}}</div>
+		</div>
+	</div>
+</div>
+```
+
+###Example of using handles
 
 ```html
 <div sv-root sv-part="modelArray">
