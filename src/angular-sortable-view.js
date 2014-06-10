@@ -19,7 +19,6 @@
 			restrict: 'A',
 			controller: ['$scope', '$attrs', '$interpolate', function($scope, $attrs, $interpolate){
 				function getSortableElements(key){
-					// return that.$sortableElements;
 					return ROOTS_MAP[key];
 				}
 				function removeSortableElements(key){
@@ -89,15 +88,25 @@
 						var rect = se.element[0].getBoundingClientRect();
 						var center = {
 							x: ~~(rect.left + rect.width/2),
-							y: ~~(rect.top + rect.height/2)	
+							y: ~~(rect.top + rect.height/2)
 						};
-						if(se.element[0].scrollHeight || se.element[0].scrollWidth){ // element is visible
+						if(!se.container && // not the container element
+							(se.element[0].scrollHeight || se.element[0].scrollWidth)){ // element is visible
 							candidates.push({
 								element: se.element,
 								q: (center.x - mouse.x)*(center.x - mouse.x) + (center.y - mouse.y)*(center.y - mouse.y),
 								view: se.getPart(),
 								targetIndex: se.getIndex(),
 								after: shouldBeAfter(center, mouse, isGrid)
+							});
+						}
+						if(se.container && !se.element[0].querySelector('[sv-element]')){ // empty container
+							candidates.push({
+								element: se.element,
+								q: (center.x - mouse.x)*(center.x - mouse.x) + (center.y - mouse.y)*(center.y - mouse.y),
+								view: se.getPart(),
+								targetIndex: 0,
+								container: true
 							});
 						}
 					});
@@ -116,7 +125,7 @@
 					});
 
 					candidates.forEach(function(cand, index){
-						if(index === 0 && !cand.placeholder){
+						if(index === 0 && !cand.placeholder && !cand.container){
 							$target = cand;
 							if(cand.after){
 								cand.element.after($placeholder);
@@ -131,6 +140,10 @@
 								}
 							}
 							cand.element.addClass('sv-candidate');
+						}
+						else if(index === 0 && cand.container){
+							$target = cand;
+							cand.element.append($placeholder);
 						}
 						else
 							cand.element.removeClass('sv-candidate');
@@ -247,6 +260,18 @@
 							scope: $scope
 						};
 						$scope.$sortableRoot = $sortable;
+
+						var sortablePart = {
+							element: $element,
+							getPart: function(){
+								return $scope.part;
+							},
+							container: true
+						};
+						$sortable.addToSortableElements(sortablePart);
+						$scope.$on('$destroy', function(){
+							$sortable.removeFromSortableElements(sortablePart);
+						});
 					},
 					post: function($scope, $element, $attrs, $sortable){
 					}
@@ -379,7 +404,6 @@
 			'pointer-events: none;' +
 		'}' +
 		'.sv-candidate{' +
-			// 'background-color: yellow !important;' +
 		'}' +
 		'.sv-placeholder{' +
 			'opacity: 0;' +
