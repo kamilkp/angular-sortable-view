@@ -9,9 +9,10 @@ You can find the source code for this demo on branch "gh-pages".
 
 ###DESCRIPTION:
 
-This is a simple library written as a module for [https://github.com/angular/angular.js](AngularJS) for sorting elements in the UI. It supports both single elements list, and multiple connected lists, where an element can be moved from one to another.
+This is a simple library written as a module for [AngularJS](https://github.com/angular/angular.js) for sorting elements in the UI. It supports both single elements list, and multiple connected lists, where an element can be moved from one to another.
 
-This library requires ***no dependencies whatsoever*** (except angular.js of course), so ***you no longer need to include jQuery and jQueryUI and angularUI*** which altogether gives the size of around ***340kB minified***. Whereas the [https://github.com/kamilkp/angular-sortable-view](Angular-sortable-view) is only ***5kB minified!***
+This library requires ***no dependencies whatsoever*** (except angular.js of course), so ***you no longer need to include jQuery and jQueryUI and angularUI*** which altogether gives the size of around ***340kB minified***. Whereas the [angular-sortable-view](https://github.com/kamilkp/angular-sortable-view) is only ***5kB minified!***
+ is only ***5kB minified!***
 
 The API is declarative. So if you need to specity a handle for sortables just place a `sv-handle` attribue on the given element. See the examples below:
 
