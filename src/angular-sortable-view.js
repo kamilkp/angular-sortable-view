@@ -256,36 +256,30 @@
 				$scope.$ctrl = this;
 			}],
 			scope: true,
-			compile: function($element, $attrs){
-				return {
-					pre: function($scope, $element, $attrs, $sortable){
-						if(!$attrs.svPart) throw new Error('no model provided');
-						var model = $parse($attrs.svPart);
-						if(!model.assign) throw new Error('model not assignable');
+			link: function($scope, $element, $attrs, $sortable){
+				if(!$attrs.svPart) throw new Error('no model provided');
+				var model = $parse($attrs.svPart);
+				if(!model.assign) throw new Error('model not assignable');
 
-						$scope.part = {
-							id: $scope.$id,
-							element: $element,
-							model: model,
-							scope: $scope,
-						};
-						$scope.$sortableRoot = $sortable;
-
-						var sortablePart = {
-							element: $element,
-							getPart: function(){
-								return $scope.part;
-							},
-							container: true
-						};
-						$sortable.addToSortableElements(sortablePart);
-						$scope.$on('$destroy', function(){
-							$sortable.removeFromSortableElements(sortablePart);
-						});
-					},
-					post: function($scope, $element, $attrs, $sortable){
-					}
+				$scope.part = {
+					id: $scope.$id,
+					element: $element,
+					model: model,
+					scope: $scope
 				};
+				$scope.$sortableRoot = $sortable;
+
+				var sortablePart = {
+					element: $element,
+					getPart: function(){
+						return $scope.part;
+					},
+					container: true
+				};
+				$sortable.addToSortableElements(sortablePart);
+				$scope.$on('$destroy', function(){
+					$sortable.removeFromSortableElements(sortablePart);
+				});
 			}
 		};
 	}]);
