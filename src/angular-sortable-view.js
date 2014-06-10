@@ -15,11 +15,12 @@
 		var ROOTS_MAP = Object.create(null);
 		// window.ROOTS_MAP = ROOTS_MAP;
 
+		var sortingInProgress;
+
 		return {
 			restrict: 'A',
 			controller: ['$scope', '$attrs', '$interpolate', function($scope, $attrs, $interpolate){
 				function getSortableElements(key){
-					// return that.$sortableElements;
 					return ROOTS_MAP[key];
 				}
 				function removeSortableElements(key){
@@ -37,6 +38,10 @@
 				var $original; // original element
 				var $target; // last best candidate
 				var isGrid = false;
+
+				this.sortingInProgress = function(){
+					return sortingInProgress;
+				};
 
 				// check if at least one of the lists have a grid like layout
 				$scope.$watchCollection(function(){
@@ -68,6 +73,7 @@
 					});
 				});
 				this.$moveUpdate = function(opts, mouse, svElement, svOriginal){
+					sortingInProgress = true;
 					candidates = [];
 					if(!$placeholder){
 						var svRect = svElement[0].getBoundingClientRect();
@@ -79,6 +85,7 @@
 						});
 						svOriginal.after($placeholder);
 						svOriginal.addClass('ng-hide');
+						svOriginal.removeClass('sv-visibility-hidden');
 
 						// cache options, helper and original element reference
 						$original = svOriginal;
@@ -89,9 +96,10 @@
 						var rect = se.element[0].getBoundingClientRect();
 						var center = {
 							x: ~~(rect.left + rect.width/2),
-							y: ~~(rect.top + rect.height/2)	
+							y: ~~(rect.top + rect.height/2)
 						};
-						if(se.element[0].scrollHeight || se.element[0].scrollWidth){ // element is visible
+						if(!se.container && // not the container element
+							(se.element[0].scrollHeight || se.element[0].scrollWidth)){ // element is visible
 							candidates.push({
 								element: se.element,
 								q: (center.x - mouse.x)*(center.x - mouse.x) + (center.y - mouse.y)*(center.y - mouse.y),
@@ -100,11 +108,20 @@
 								after: shouldBeAfter(center, mouse, isGrid)
 							});
 						}
+						if(se.container && !se.element[0].querySelector('[sv-element]')){ // empty container
+							candidates.push({
+								element: se.element,
+								q: (center.x - mouse.x)*(center.x - mouse.x) + (center.y - mouse.y)*(center.y - mouse.y),
+								view: se.getPart(),
+								targetIndex: 0,
+								container: true
+							});
+						}
 					});
 					var pRect = $placeholder[0].getBoundingClientRect();
 					var pCenter = {
 						x: ~~(pRect.left + pRect.width/2),
-						y: ~~(pRect.top + pRect.height/2)	
+						y: ~~(pRect.top + pRect.height/2)
 					};
 					candidates.push({
 						q: (pCenter.x - mouse.x)*(pCenter.x - mouse.x) + (pCenter.y - mouse.y)*(pCenter.y - mouse.y),
@@ -116,7 +133,7 @@
 					});
 
 					candidates.forEach(function(cand, index){
-						if(index === 0 && !cand.placeholder){
+						if(index === 0 && !cand.placeholder && !cand.container){
 							$target = cand;
 							if(cand.after){
 								cand.element.after($placeholder);
@@ -131,6 +148,10 @@
 								}
 							}
 							cand.element.addClass('sv-candidate');
+						}
+						else if(index === 0 && cand.container){
+							$target = cand;
+							cand.element.append($placeholder);
 						}
 						else
 							cand.element.removeClass('sv-candidate');
@@ -154,6 +175,7 @@
 						afterRevert();
 
 					function afterRevert(){
+						sortingInProgress = false;
 						$placeholder.remove();
 						$helper.remove();
 						$original.removeClass('ng-hide');
@@ -231,26 +253,33 @@
 				this.$drop = function(index, options){
 					$scope.$sortableRoot.$drop($scope.part, index, options);
 				};
+				$scope.$ctrl = this;
 			}],
 			scope: true,
-			compile: function($element, $attrs){
-				return {
-					pre: function($scope, $element, $attrs, $sortable){
-						if(!$attrs.svPart) throw new Error('no model provided');
-						var model = $parse($attrs.svPart);
-						if(!model.assign) throw new Error('model not assignable');
+			link: function($scope, $element, $attrs, $sortable){
+				if(!$attrs.svPart) throw new Error('no model provided');
+				var model = $parse($attrs.svPart);
+				if(!model.assign) throw new Error('model not assignable');
 
-						$scope.part = {
-							id: $scope.$id,
-							element: $element,
-							model: model,
-							scope: $scope
-						};
-						$scope.$sortableRoot = $sortable;
-					},
-					post: function($scope, $element, $attrs, $sortable){
-					}
+				$scope.part = {
+					id: $scope.$id,
+					element: $element,
+					model: model,
+					scope: $scope
 				};
+				$scope.$sortableRoot = $sortable;
+
+				var sortablePart = {
+					element: $element,
+					getPart: function(){
+						return $scope.part;
+					},
+					container: true
+				};
+				$sortable.addToSortableElements(sortablePart);
+				$scope.$on('$destroy', function(){
+					$sortable.removeFromSortableElements(sortablePart);
+				});
 			}
 		};
 	}]);
@@ -287,10 +316,18 @@
 					}
 				});
 
+				var helper;
+				$scope.$watch('$ctrl.helper', function(customHelper){
+					if(customHelper){
+						helper = customHelper;
+					}
+				});
+
 				var body = angular.element(document.body);
 				var html = angular.element(document.documentElement);
 				
 				function onMousedown(e){
+					if($controllers[1].sortingInProgress()) return;
 					if(e.button != 0) return;
 
 					var opts = $parse($attrs.svElement)($scope);
@@ -306,28 +343,44 @@
 
 					var target = $element;
 					var clientRect = $element[0].getBoundingClientRect();
-					var clone = target.clone();
-					clone.addClass('sv-helper').css({
-						'left': clientRect.left + document.body.scrollLeft + 'px',
-						'top': clientRect.top + document.body.scrollTop + 'px',
-						'width': clientRect.width + 'px'
-					});
+					var clone;
+
+					if(!helper) helper = $controllers[0].helper;
+					if(helper){
+						clone = helper.clone();
+						clone.removeClass('ng-hide');
+						clone.css({
+							'left': clientRect.left + document.body.scrollLeft + 'px',
+							'top': clientRect.top + document.body.scrollTop + 'px'
+						});
+						target.addClass('sv-visibility-hidden');
+					}
+					else{
+						clone = target.clone();
+						clone.addClass('sv-helper').css({
+							'left': clientRect.left + document.body.scrollLeft + 'px',
+							'top': clientRect.top + document.body.scrollTop + 'px',
+							'width': clientRect.width + 'px'
+						});
+					}
+
 					body.append(clone);
 					clone[0].reposition = function(coords, absolute){
 						var leftPx = absolute ? 0 : +this.style.left.slice(0, -2);
 						var topPx = absolute ? 0 : +this.style.top.slice(0, -2);
 						var targetLeft = leftPx + coords.x;
 						var targetTop = topPx + coords.y;
+						var helperRect = clone[0].getBoundingClientRect();
 
 						if(containmentRect){
 							if(targetTop < containmentRect.top + document.body.scrollTop) // top boundary
 								targetTop = containmentRect.top + document.body.scrollTop;
-							if(targetTop + clientRect.height > containmentRect.top + document.body.scrollTop + containmentRect.height) // bottom boundary
-								targetTop = containmentRect.top + document.body.scrollTop + containmentRect.height - clientRect.height;
+							if(targetTop + helperRect.height > containmentRect.top + document.body.scrollTop + containmentRect.height) // bottom boundary
+								targetTop = containmentRect.top + document.body.scrollTop + containmentRect.height - helperRect.height;
 							if(targetLeft < containmentRect.left + document.body.scrollLeft) // left boundary
 								targetLeft = containmentRect.left + document.body.scrollLeft;
-							if(targetLeft + clientRect.width > containmentRect.left + document.body.scrollLeft + containmentRect.width) // right boundary
-								targetLeft = containmentRect.left + document.body.scrollLeft + containmentRect.width - clientRect.width;	
+							if(targetLeft + helperRect.width > containmentRect.left + document.body.scrollLeft + containmentRect.width) // right boundary
+								targetLeft = containmentRect.left + document.body.scrollLeft + containmentRect.width - helperRect.width;
 						}
 						this.style.left = targetLeft + 'px';
 						this.style.top = targetTop + 'px';
@@ -344,6 +397,8 @@
 						html.removeClass('sv-sorting-in-progress');
 						$controllers[0].$drop($scope.$index, opts);
 					});
+
+					$controllers[1].$moveUpdate(opts, {x: e.clientX, y: e.clientY}, clone, $element);
 
 					function onMousemove(e){
 						// ----- move the element
@@ -370,6 +425,21 @@
 		};
 	});
 
+	module.directive('svHelper', function(){
+		return {
+			require: ['?^svPart', '?^svElement'],
+			link: function($scope, $element, $attrs, $ctrl){
+				$element.addClass('sv-helper').addClass('ng-hide');
+				if($ctrl[1])
+					$ctrl[1].helper = $element;
+				else if($ctrl[0])
+					$ctrl[0].helper = $element;
+				else
+					throw 'svHelper is not nested inside svPart or svElement';
+			}
+		};
+	});
+
 	angular.element(document.head).append([
 		'<style>' +
 		'.sv-helper{' +
@@ -379,7 +449,6 @@
 			'pointer-events: none;' +
 		'}' +
 		'.sv-candidate{' +
-			// 'background-color: yellow !important;' +
 		'}' +
 		'.sv-placeholder{' +
 			'opacity: 0;' +
@@ -389,6 +458,9 @@
 			'-moz-user-select: none;' +
 			'-ms-user-select: none;' +
 			'user-select: none;' +
+		'}' +
+		'.sv-visibility-hidden{' +
+			'visibility: hidden;' +
 		'}' +
 		'</style>'
 	].join(''));
