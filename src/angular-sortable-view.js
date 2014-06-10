@@ -350,7 +350,7 @@
 					var target = $element;
 					var clientRect = $element[0].getBoundingClientRect();
 					var clone;
-					
+
 					if(!helper) helper = $controllers[0].helper;
 					if(helper){
 						clone = helper.clone();
@@ -376,16 +376,17 @@
 						var topPx = absolute ? 0 : +this.style.top.slice(0, -2);
 						var targetLeft = leftPx + coords.x;
 						var targetTop = topPx + coords.y;
+						var helperRect = clone[0].getBoundingClientRect();
 
 						if(containmentRect){
 							if(targetTop < containmentRect.top + document.body.scrollTop) // top boundary
 								targetTop = containmentRect.top + document.body.scrollTop;
-							if(targetTop + clientRect.height > containmentRect.top + document.body.scrollTop + containmentRect.height) // bottom boundary
-								targetTop = containmentRect.top + document.body.scrollTop + containmentRect.height - clientRect.height;
+							if(targetTop + helperRect.height > containmentRect.top + document.body.scrollTop + containmentRect.height) // bottom boundary
+								targetTop = containmentRect.top + document.body.scrollTop + containmentRect.height - helperRect.height;
 							if(targetLeft < containmentRect.left + document.body.scrollLeft) // left boundary
 								targetLeft = containmentRect.left + document.body.scrollLeft;
-							if(targetLeft + clientRect.width > containmentRect.left + document.body.scrollLeft + containmentRect.width) // right boundary
-								targetLeft = containmentRect.left + document.body.scrollLeft + containmentRect.width - clientRect.width;
+							if(targetLeft + helperRect.width > containmentRect.left + document.body.scrollLeft + containmentRect.width) // right boundary
+								targetLeft = containmentRect.left + document.body.scrollLeft + containmentRect.width - helperRect.width;
 						}
 						this.style.left = targetLeft + 'px';
 						this.style.top = targetTop + 'px';
