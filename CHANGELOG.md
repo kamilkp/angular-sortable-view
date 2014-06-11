@@ -1,3 +1,11 @@
+Version 0.0.3 - 2014/06/11
+================
+
+  * Added support for custom placeholders
+  * Better containment handling
+  * Bug fixes
+  * BREAKING CHANGE: the module name is now `angular-sortable-view`
+
 Version 0.0.2 - 2014/06/11
 ================
 

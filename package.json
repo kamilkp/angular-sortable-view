@@ -1,6 +1,6 @@
 {
   "name": "angular-sortable-view",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Fully declarative (multi)sortable for AngularJS",
   "homepage": "http://kamilkp.github.io/angular-sortable-view",
   "author": {

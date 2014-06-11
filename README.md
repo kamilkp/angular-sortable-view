@@ -24,6 +24,7 @@ The API is declarative. There are four directives (hooked on attributes) that ne
   * `sv-element` - this attribute should be placed on the same element as `ng-repeat` attribute. Its (optional) value should be an expression that evaluates to the options object.
   * `sv-handle` - this attribute is optional. If needed it can be placed on an element within the sortable element. This element will be the handle for sorting operations.
   * `sv-helper` - the element with this attribute will serve as a custom helper for sorting operations
+  * `sv-placeholder` - the element with this attribute will serve as a custom placeholder for sorting operations  
 
 ###Example of single sortable list
 
@@ -100,6 +101,31 @@ The API is declarative. There are four directives (hooked on attributes) that ne
 	<div ng-repeat="item in modelArray" sv-element>
 		<div sv-helper>
 			custom helper {{item}}
+		</div>
+		{{item}}
+	</div>
+</div>
+
+###Example of using custom placeholders per part
+
+```html
+<div sv-root sv-part="modelArray">
+	<div sv-placeholder>
+		custom placeholder
+	</div>
+	<div ng-repeat="item in modelArray" sv-element>
+		{{item}}
+	</div>
+</div>
+```
+
+###Example of using custom placeholders per element
+
+```html
+<div sv-root sv-part="modelArray">
+	<div ng-repeat="item in modelArray" sv-element>
+		<div sv-placeholder>
+			custom placeholder {{item}}
 		</div>
 		{{item}}
 	</div>
