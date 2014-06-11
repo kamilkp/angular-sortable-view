@@ -1,32 +1,32 @@
+//
+// Copyright Kamil Pękala http://github.com/kamilkp
+// angular-sortable-view v0.0.3 2014/06/11
+//
+
 ;(function(window, angular){
 	'use strict';
 	/* jshint eqnull:true */
 	/* jshint -W041 */
 
-	var module = angular.module('sortableView', []);
+	var module = angular.module('angular-sortable-view', []);
 	module.directive('svRoot', [function(){
 		function shouldBeAfter(elem, pointer, isGrid){
-			if(isGrid)
-				return elem.x - pointer.x < 0;
-			else
-				return elem.y - pointer.y < 0;
+			return isGrid ? elem.x - pointer.x < 0 : elem.y - pointer.y < 0;
+		}
+		function getSortableElements(key){
+			return ROOTS_MAP[key];
+		}
+		function removeSortableElements(key){
+			delete ROOTS_MAP[key];
 		}
 
-		var ROOTS_MAP = Object.create(null);
-		// window.ROOTS_MAP = ROOTS_MAP;
-
 		var sortingInProgress;
+		var ROOTS_MAP = Object.create(null);
+		// window.ROOTS_MAP = ROOTS_MAP; // for debug purposes
 
 		return {
 			restrict: 'A',
 			controller: ['$scope', '$attrs', '$interpolate', function($scope, $attrs, $interpolate){
-				function getSortableElements(key){
-					return ROOTS_MAP[key];
-				}
-				function removeSortableElements(key){
-					delete ROOTS_MAP[key];
-				}
-
 				var mapKey = $interpolate($attrs.svRoot)($scope) || $scope.$id;
 				if(!ROOTS_MAP[mapKey]) ROOTS_MAP[mapKey] = [];
 
@@ -48,7 +48,9 @@
 					return getSortableElements(mapKey);
 				}, function(collection){
 					isGrid = false;
-					var array = collection.map(function(item){
+					var array = collection.filter(function(item){
+						return !item.container;
+					}).map(function(item){
 						return {
 							part: item.getPart().id,
 							y: item.element[0].getBoundingClientRect().top
@@ -72,19 +74,34 @@
 						});
 					});
 				});
-				this.$moveUpdate = function(opts, mouse, svElement, svOriginal){
+
+				this.$moveUpdate = function(opts, mouse, svElement, svOriginal, svPlaceholder){
+					var svRect = svElement[0].getBoundingClientRect();
+					if(opts.tolerance === 'element')
+						mouse = {
+							x: ~~(svRect.left + svRect.width/2),
+							y: ~~(svRect.top + svRect.height/2)
+						};
+
 					sortingInProgress = true;
 					candidates = [];
 					if(!$placeholder){
-						var svRect = svElement[0].getBoundingClientRect();
-						$placeholder = svOriginal.clone();
-						$placeholder.addClass('sv-placeholder');
-						$placeholder.css({
-							'height': svRect.height + 'px',
-							'width': svRect.width + 'px'
-						});
+						if(svPlaceholder){ // custom placeholder
+							$placeholder = svPlaceholder.clone();
+							$placeholder.removeClass('ng-hide');
+						}
+						else{ // default placeholder
+							$placeholder = svOriginal.clone();
+							$placeholder.addClass('sv-visibility-hidden');
+							$placeholder.addClass('sv-placeholder');
+							$placeholder.css({
+								'height': svRect.height + 'px',
+								'width': svRect.width + 'px'
+							});
+						}
+
 						svOriginal.after($placeholder);
-						svOriginal.addClass('ng-hide');
+						svOriginal.addClass('ng-hide').addClass('sv-source');
 						svOriginal.removeClass('sv-visibility-hidden');
 
 						// cache options, helper and original element reference
@@ -92,7 +109,22 @@
 						options = opts;
 						$helper = svElement;
 					}
+
+					// ----- move the element
+					$helper[0].reposition({
+						x: mouse.x + document.body.scrollLeft - mouse.offset.x*svRect.width,
+						y: mouse.y + document.body.scrollTop - mouse.offset.y*svRect.height
+					}, true /* absolute position provided */);
+
+					// ----- manage candidates
 					getSortableElements(mapKey).forEach(function(se, index){
+						if(opts.containment != null){
+							// TODO: optimize this since it could be calculated only once when the moving begins
+							if(
+								!elementMatchesSelector(se.element, opts.containment) &&
+								!elementMatchesSelector(se.element, opts.containment + ' *')
+							) return; // element is not within allowed containment
+						}
 						var rect = se.element[0].getBoundingClientRect();
 						var center = {
 							x: ~~(rect.left + rect.width/2),
@@ -108,7 +140,7 @@
 								after: shouldBeAfter(center, mouse, isGrid)
 							});
 						}
-						if(se.container && !se.element[0].querySelector('[sv-element]')){ // empty container
+						if(se.container && !se.element[0].querySelector('[sv-element]:not(.sv-placeholder):not(.sv-source)')){ // empty container
 							candidates.push({
 								element: se.element,
 								q: (center.x - mouse.x)*(center.x - mouse.x) + (center.y - mouse.y)*(center.y - mouse.y),
@@ -135,19 +167,11 @@
 					candidates.forEach(function(cand, index){
 						if(index === 0 && !cand.placeholder && !cand.container){
 							$target = cand;
-							if(cand.after){
-								cand.element.after($placeholder);
-							}
-							else{
-								var prevSibl = getPreviousSibling(cand.element);
-								if(prevSibl.length > 0){
-									prevSibl.after($placeholder);
-								}
-								else{
-									cand.element.parent().prepend($placeholder);
-								}
-							}
 							cand.element.addClass('sv-candidate');
+							if(cand.after)
+								cand.element.after($placeholder);
+							else
+								insertElementBefore(cand.element, $placeholder);
 						}
 						else if(index === 0 && cand.container){
 							$target = cand;
@@ -178,7 +202,7 @@
 						sortingInProgress = false;
 						$placeholder.remove();
 						$helper.remove();
-						$original.removeClass('ng-hide');
+						$original.removeClass('ng-hide').removeClass('sv-source');
 
 						candidates = void 0;
 						$placeholder = void 0;
@@ -189,9 +213,11 @@
 						if($target){
 							$target.element.removeClass('sv-candidate');
 							var spliced = originatingPart.model(originatingPart.scope).splice(index, 1);
-							var targetIndex = ($target.view === originatingPart && $target.targetIndex > index) ?
-								$target.targetIndex - 1 : $target.targetIndex;
-							if($target.after) targetIndex++;
+							var targetIndex = $target.targetIndex;
+							if($target.view === originatingPart && $target.targetIndex > index)
+								targetIndex--;
+							if($target.after)
+								targetIndex++;
 							$target.view.model($target.view.scope).splice(targetIndex, 0, spliced[0]);
 							if(!$scope.$root.$$phase) $scope.$apply();
 						}
@@ -235,7 +261,6 @@
 					if($helper){
 						$helper[0].reposition(diff);
 					}
-
 					_prevScroll = _scroll;
 				}
 			}]
@@ -247,13 +272,13 @@
 			restrict: 'A',
 			require: '^svRoot',
 			controller: ['$scope', function($scope){
+				$scope.$ctrl = this;
 				this.getPart = function(){
 					return $scope.part;
 				};
 				this.$drop = function(index, options){
 					$scope.$sortableRoot.$drop($scope.part, index, options);
 				};
-				$scope.$ctrl = this;
 			}],
 			scope: true,
 			link: function($scope, $element, $attrs, $sortable){
@@ -271,9 +296,7 @@
 
 				var sortablePart = {
 					element: $element,
-					getPart: function(){
-						return $scope.part;
-					},
+					getPart: $scope.$ctrl.getPart,
 					container: true
 				};
 				$sortable.addToSortableElements(sortablePart);
@@ -294,9 +317,7 @@
 			link: function($scope, $element, $attrs, $controllers){
 				var sortableElement = {
 					element: $element,
-					getPart: function(){
-						return $controllers[0].getPart();
-					},
+					getPart: $controllers[0].getPart,
 					getIndex: function(){
 						return $scope.$index;
 					}
@@ -323,6 +344,13 @@
 					}
 				});
 
+				var placeholder;
+				$scope.$watch('$ctrl.placeholder', function(customPlaceholder){
+					if(customPlaceholder){
+						placeholder = customPlaceholder;
+					}
+				});
+
 				var body = angular.element(document.body);
 				var html = angular.element(document.documentElement);
 				
@@ -337,8 +365,7 @@
 						containment: 'html'
 					}, opts);
 					if(opts.containment){
-						opts.containment = document.querySelector(opts.containment);
-						var containmentRect = opts.containment.getBoundingClientRect();
+						var containmentRect = document.querySelector(opts.containment).getBoundingClientRect();
 					}
 
 					var target = $element;
@@ -346,6 +373,7 @@
 					var clone;
 
 					if(!helper) helper = $controllers[0].helper;
+					if(!placeholder) placeholder = $controllers[0].placeholder;
 					if(helper){
 						clone = helper.clone();
 						clone.removeClass('ng-hide');
@@ -371,24 +399,25 @@
 						var targetLeft = leftPx + coords.x;
 						var targetTop = topPx + coords.y;
 						var helperRect = clone[0].getBoundingClientRect();
+						var body = document.body;
 
 						if(containmentRect){
-							if(targetTop < containmentRect.top + document.body.scrollTop) // top boundary
-								targetTop = containmentRect.top + document.body.scrollTop;
-							if(targetTop + helperRect.height > containmentRect.top + document.body.scrollTop + containmentRect.height) // bottom boundary
-								targetTop = containmentRect.top + document.body.scrollTop + containmentRect.height - helperRect.height;
-							if(targetLeft < containmentRect.left + document.body.scrollLeft) // left boundary
-								targetLeft = containmentRect.left + document.body.scrollLeft;
-							if(targetLeft + helperRect.width > containmentRect.left + document.body.scrollLeft + containmentRect.width) // right boundary
-								targetLeft = containmentRect.left + document.body.scrollLeft + containmentRect.width - helperRect.width;
+							if(targetTop < containmentRect.top + body.scrollTop) // top boundary
+								targetTop = containmentRect.top + body.scrollTop;
+							if(targetTop + helperRect.height > containmentRect.top + body.scrollTop + containmentRect.height) // bottom boundary
+								targetTop = containmentRect.top + body.scrollTop + containmentRect.height - helperRect.height;
+							if(targetLeft < containmentRect.left + body.scrollLeft) // left boundary
+								targetLeft = containmentRect.left + body.scrollLeft;
+							if(targetLeft + helperRect.width > containmentRect.left + body.scrollLeft + containmentRect.width) // right boundary
+								targetLeft = containmentRect.left + body.scrollLeft + containmentRect.width - helperRect.width;
 						}
 						this.style.left = targetLeft + 'px';
 						this.style.top = targetTop + 'px';
 					};
 
 					var pointerOffset = {
-						x: e.clientX - clientRect.left,
-						y: e.clientY - clientRect.top
+						x: (e.clientX - clientRect.left)/clientRect.width,
+						y: (e.clientY - clientRect.top)/clientRect.height
 					};
 					html.addClass('sv-sorting-in-progress');
 					html.on('mousemove', onMousemove).on('mouseup', function mouseup(e){
@@ -398,18 +427,13 @@
 						$controllers[0].$drop($scope.$index, opts);
 					});
 
-					$controllers[1].$moveUpdate(opts, {x: e.clientX, y: e.clientY}, clone, $element);
-
+					onMousemove(e);
 					function onMousemove(e){
-						// ----- move the element
-						var pos = {
-							x: e.clientX + document.body.scrollLeft - pointerOffset.x,
-							y: e.clientY + document.body.scrollTop - pointerOffset.y
-						};
-						clone[0].reposition(pos, true /* absolute position provided */);
-
-						// ----- reorganize placeholders
-						$controllers[1].$moveUpdate(opts, {x: e.clientX, y: e.clientY}, clone, $element);
+						$controllers[1].$moveUpdate(opts, {
+							x: e.clientX,
+							y: e.clientY,
+							offset: pointerOffset
+						}, clone, $element, placeholder);
 					}
 				}
 			}
@@ -418,9 +442,10 @@
 
 	module.directive('svHandle', function(){
 		return {
-			require: '^svElement',
+			require: '?^svElement',
 			link: function($scope, $element, $attrs, $ctrl){
-				$ctrl.handle = $element;
+				if($ctrl)
+					$ctrl.handle = $element;
 			}
 		};
 	});
@@ -434,8 +459,19 @@
 					$ctrl[1].helper = $element;
 				else if($ctrl[0])
 					$ctrl[0].helper = $element;
-				else
-					throw 'svHelper is not nested inside svPart or svElement';
+			}
+		};
+	});
+
+	module.directive('svPlaceholder', function(){
+		return {
+			require: ['?^svPart', '?^svElement'],
+			link: function($scope, $element, $attrs, $ctrl){
+				$element.addClass('sv-placeholder').addClass('ng-hide');
+				if($ctrl[1])
+					$ctrl[1].placeholder = $element;
+				else if($ctrl[0])
+					$ctrl[0].placeholder = $element;
 			}
 		};
 	});
@@ -451,7 +487,7 @@
 		'.sv-candidate{' +
 		'}' +
 		'.sv-placeholder{' +
-			'opacity: 0;' +
+			// 'opacity: 0;' +
 		'}' +
 		'.sv-sorting-in-progress{' +
 			'-webkit-user-select: none;' +
@@ -460,7 +496,8 @@
 			'user-select: none;' +
 		'}' +
 		'.sv-visibility-hidden{' +
-			'visibility: hidden;' +
+			'visibility: hidden !important;' +
+			'opacity: 0 !important;' +
 		'}' +
 		'</style>'
 	].join(''));
@@ -475,5 +512,33 @@
 				sib = sib.previousSibling;
 			return angular.element(sib);
 		}
+	}
+
+	function insertElementBefore(element, newElement){
+		var prevSibl = getPreviousSibling(element);
+		if(prevSibl.length > 0){
+			prevSibl.after(newElement);
+		}
+		else{
+			element.parent().prepend(newElement);
+		}
+	}
+
+	var dde = document.documentElement,
+	matchingFunction = dde.matches ? 'matches' :
+						dde.matchesSelector ? 'matchesSelector' :
+						dde.webkitMatches ? 'webkitMatches' :
+						dde.webkitMatchesSelector ? 'webkitMatchesSelector' :
+						dde.msMatches ? 'msMatches' :
+						dde.msMatchesSelector ? 'msMatchesSelector' :
+						dde.mozMatches ? 'mozMatches' :
+						dde.mozMatchesSelector ? 'mozMatchesSelector' : null;
+	if(matchingFunction == null)
+		throw 'This browser doesn\'t support the HTMLElement.matches method';
+
+	function elementMatchesSelector(element, selector){
+		if(element instanceof angular.element) element = element[0];
+		if(matchingFunction !== null)
+			return element[matchingFunction](selector);
 	}
 })(window, window.angular);

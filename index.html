@@ -153,6 +153,20 @@
 			border: 1px solid teal;
 			background-color: hsl(0, 100%, 90%);
 		}
+		.placeholder-left, .placeholder-right{
+			width: 100%;
+			height: 38px;
+			text-align: center;
+			background: whitesmoke; 
+			border: 3px dashed gray; 
+			box-sizing: border-box;
+			display: table;
+			margin-bottom: 5px;
+			& > span{
+				display: table-cell;
+				vertical-align: middle;
+			}
+		}
 	</style>
 	<script>
 		function getArray(size, prefix){
@@ -164,7 +178,7 @@
 			return arr;
 		}
 		function AppController($scope, $location){
-			$scope.tab = 6;
+			$scope.tab = 7;
 			$scope.$watch(function(){
 				return $location.search();
 			}, function(obj){
@@ -187,7 +201,9 @@
 					getArray(0, '8.'),	
 				],
 				items6: getArray(10, '9.'),
-				items7: getArray(7, '10.')
+				items7: getArray(7, '10.'),
+				items8: getArray(10, '11.'),
+				items9: getArray(7, '12.'),
 			};
 			$scope.containmentChange = function(val){
 				this.opts.containment = val ? '.sortable-container' : 'html';
@@ -225,22 +241,41 @@
 									'		</div>\n' +
 									'	</div>\n' +
 									'</div>\n';
-			$scope.example5Source = '<div class="sortable-container" sv-part="data.items6">\n' +
-									'	<div sv-helper class="helper-left">\n' +
-									'		custom left helper\n' +
-									'	</div>\n' +
-									'	<div ng-repeat="item in data.items6" sv-element class="well multi">\n' +
-									'		{{item}}\n' +
-									'	</div>\n' +
-									'</div>\n' +
-									'<div class="sortable-container" sv-part="data.items7">\n' +
-									'	<div ng-repeat="item in data.items7" sv-element class="well multi">\n' +
-									'		<div sv-helper class="helper-right">\n' +
-									'			custom right helper {{item}}\n' +
+			$scope.example5Source = '<div class="multi-sortable" sv-root>\n' +
+									'	<div class="sortable-container" sv-part="data.items6">\n' +
+									'		<div sv-helper class="helper-left">\n' +
+									'			custom left helper\n' +
 									'		</div>\n' +
-									'		{{item}}\n' +
+									'		<div ng-repeat="item in data.items6" sv-element class="well multi">\n' +
+									'			{{item}}\n' +
+									'		</div>\n' +
 									'	</div>\n' +
-									'</div>\n';
+									'	<div class="sortable-container" sv-part="data.items7">\n' +
+									'		<div ng-repeat="item in data.items7" sv-element class="well multi">\n' +
+									'			<div sv-helper class="helper-right">\n' +
+									'				custom right helper {{item}}\n' +
+									'			</div>\n' +
+									'			{{item}}\n' +
+									'		</div>\n' +
+									'	</div>\n' +
+									'</div>';
+			$scope.example6Source = '<div class="multi-sortable" sv-root>\n' +
+									'	<div class="sortable-container" sv-part="data.items8">\n' +
+									'		<div sv-placeholder class="placeholder-left">\n' +
+									'			<span>custom left placeholder</span>\n' +
+									'		</div>\n' +
+									'		<div ng-repeat="item in data.items8" sv-element class="well multi">\n' +
+									'			{{item}}\n' +
+									'		</div>\n' +
+									'	</div>\n' +
+									'	<div class="sortable-container" sv-part="data.items9">\n' +
+									'		<div ng-repeat="item in data.items9" sv-element class="well multi">\n' +
+									'			<div sv-helper class="placeholder-right">\n' +
+									'				<span>custom right placeholder {{item}}</span>\n' +
+									'			</div>\n' +
+									'			{{item}}\n' +
+									'	</div>\n' +
+									'</div>';
 			$scope.aboutExample1 =  '<div sv-root sv-part="modelArray">\n' +
 									'	<div ng-repeat="item in modelArray" sv-element>\n' +
 									'		<div>{{item}}</div>\n' +
@@ -292,8 +327,24 @@
 									'		{{item}}\n' +
 									'	</div>\n' +
 									'</div>\n';
+			$scope.aboutExample6 = 	'<div sv-root sv-part="modelArray">\n' +
+									'	<div sv-placeholder>\n' +
+									'		custom placeholder\n' +
+									'	</div>\n' +
+									'	<div ng-repeat="item in modelArray" sv-element>\n' +
+									'		{{item}}\n' +
+									'	</div>\n' +
+									'</div>\n';
+			$scope.aboutExample61 = '<div sv-root sv-part="modelArray">\n' +
+									'	<div ng-repeat="item in modelArray" sv-element>\n' +
+									'		<div sv-placeholder>\n' +
+									'			custom placeholder {{item}}\n' +
+									'		</div>\n' +
+									'		{{item}}\n' +
+									'	</div>\n' +
+									'</div>\n';
 		}
-		angular.module('app', ['sortableView']).
+		angular.module('app', ['angular-sortable-view']).
 			directive('highlightOnLoad', function($parse){
 				return {
 					compile: function($element, $attrs){
@@ -326,14 +377,16 @@
 		  <li ng-class="{active: tab == 3}"><a ng-click="tab = 3">Grid with handles</a></li>
 		  <li ng-class="{active: tab == 4}"><a ng-click="tab = 4">Multiple multi sortables</a></li>
 		  <li ng-class="{active: tab == 5}"><a ng-click="tab = 5">Custom helpers</a></li>
-		  <li ng-class="{active: tab == 6}"><a ng-click="tab = 6">About</a></li>
+		  <li ng-class="{active: tab == 6}"><a ng-click="tab = 6">Custom placeholders</a></li>
+		  <li ng-class="{active: tab == 7}"><a ng-click="tab = 7">About</a></li>
 		</ul>
 		<div ng-if="tab == 1" ng-include="'templates/tab1.html'" ng-init="opts = {}; conainmentChange(false)"></div>
 		<div ng-if="tab == 2" ng-include="'templates/tab2.html'"></div>
 		<div ng-if="tab == 3" ng-include="'templates/tab3.html'" ng-init="opts = {}; conainmentChange(false)"></div>
 		<div ng-if="tab == 4" ng-include="'templates/tab4.html'"></div>
 		<div ng-if="tab == 5" ng-include="'templates/tab5.html'"></div>
-		<div ng-if="tab == 6" ng-include="'templates/tabAbout.html'" highlight-after-digest></div>
+		<div ng-if="tab == 6" ng-include="'templates/tab6.html'"></div>
+		<div ng-if="tab == 7" ng-include="'templates/tabAbout.html'" highlight-after-digest></div>
 	</div>
 </body>
 </html>

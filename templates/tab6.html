@@ -1,0 +1,35 @@
+<h3>
+	Custom placeholders
+</h3>
+<p>
+	This example shows the usage of <a href="https://github.com/kamilkp/angular-sortable-view">angular-sortable-view</a> with custom placeholders. Note that you can define a placeholder per sortable part, or per element separately and even use angular bindings there.
+</p>
+<div class="row">
+	<div class="col-xs-6">
+		<div sv-root class="multi-sortable">
+			<div class="sortable-container" sv-part="data.items8">
+				<div sv-placeholder class="placeholder-left">
+					<span>custom left placeholder</span>
+				</div>
+				<div ng-repeat="item in data.items8" sv-element class="well multi">
+					{{item}}
+				</div>
+			</div>
+			<div class="sortable-container" sv-part="data.items9">
+				<div ng-repeat="item in data.items9" sv-element class="well multi">
+					<div sv-placeholder class="placeholder-right">
+						<span>custom right placeholder {{item}}</span>
+					</div>
+					{{item}}
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="col-xs-6">
+		<h4>HTML:</h4>
+		<pre class="prettyprint" highlight-on-load="example6Source"></pre>
+		<h4>Model:</h4>
+		<pre class="prettyprint lang-js color-white" ng-bind="printArray(data.items8)"></pre>
+		<pre class="prettyprint lang-js color-white" ng-bind="printArray(data.items9)"></pre>
+	</div>
+</div>
