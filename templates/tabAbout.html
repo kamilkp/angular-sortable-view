@@ -1,0 +1,35 @@
+<h3>About</h3>
+<p>
+	This is a simple library written as a module for <a href="https://github.com/angular/angular.js">AngularJS</a> for sorting elements in the UI. It supports both single elements list, and multiple connected lists, where an element can be moved from one to another.
+</p>
+<p>
+	This library requires <b>no dependencies whatsoever</b> (except angular.js of course), so <b>you no longer need to include jQuery and jQueryUI and angularUI</b> which altogether gives the size of around <b class="danger">340kB minified!</b>. Whereas the <a href="https://github.com/kamilkp/angular-sortable-view">angular-sortable-view</a> is only <b class="success">5kB minified!</b>
+</p>
+<h3>API</h3>
+<p>
+	The API is declarative. There are four directives (hooked on attributes) that need to be nested properly:
+	<ul class="list">
+		<li><span class="syntax">sv-root</span></li>this is where all the logic is happening. If multiple lists should be connected with each other so that elements can be moved between them and they have a common ancestor, put this attribute on that element. If not and you still want the multi-sortable behaviour a value for that attribue must be provided. That value will be used as an identifier to connect those roots together.
+		<li><span class="syntax">sv-part</span></li>this attribute should be placed on an element that is a container for the <span class="syntax">ngRepeat</span>'ed elements. Its value should be the same as the right hand side expression in <span class="syntax">ng-repeat</span> attribute.
+		<li><span class="syntax">sv-element</span></li>this attribute should be placed on the same element as <span class="syntax">ng-repeat</span> attribute. Its (optional) value should be an expression that evaluates to the options object.
+		<li><span class="syntax">sv-handle</span></li>this attribute is optional. If needed it can be placed on an element within the sortable element. This element will be the handle for sorting operations.
+		<li><span class="syntax">sv-helper</span></li>the element with this attribute will serve as a custom helper for sorting operations.
+	</ul>
+</p>
+<p>
+	See the examples below:
+</p>
+<p>
+	<h4>Example of single sortable list</h4>
+	<pre class="prettyprint" ng-bind="aboutExample1"></pre>
+	<h4>Example of multiple sortable lists with common ancestor</h4>
+	<pre class="prettyprint" ng-bind="aboutExample2"></pre>
+	<h4>Example of multiple sortable lists without common ancestor</h4>
+	<pre class="prettyprint" ng-bind="aboutExample3"></pre>
+	<h4>Example of using handles</h4>
+	<pre class="prettyprint" ng-bind="aboutExample4"></pre>
+	<h4>Example of using custom helpers per part</h4>
+	<pre class="prettyprint" ng-bind="aboutExample5"></pre>
+	<h4>Example of using custom helpers per element</h4>
+	<pre class="prettyprint" ng-bind="aboutExample51"></pre>
+</p>

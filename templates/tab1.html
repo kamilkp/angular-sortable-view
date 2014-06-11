@@ -1,0 +1,28 @@
+<h3>
+	Single sortable container
+</h3>
+<p>
+	This example shows the basic usage of <a href="https://github.com/kamilkp/angular-sortable-view">angular-sortable-view</a>
+</p>
+<p>
+	The html consits of a single ng-repeat'ed list of elements. Try dragging one of them into the target position
+</p>
+<div class="row">
+	<div class="col-xs-5">
+		<label style="margin-bottom: 10px;">
+			<input type="checkbox" ng-model="containmentFlag" ng-change="containmentChange(containmentFlag)"/>
+			Contain sorting to yellow container
+		</label>
+		<div class="sortable-container" sv-root sv-part="data.items1">
+			<div ng-repeat="item in data.items1" sv-element="opts" class="well">
+				{{item}}
+			</div>
+		</div>
+	</div>
+	<div class="col-xs-7">
+		<h4>HTML:</h4>
+		<pre class="prettyprint" highlight-on-load="example1Source"></pre>
+		<h4>Model:</h4>
+		<pre class="prettyprint lang-js color-white" ng-bind="printArray(data.items1)"></pre>
+	</div>
+</div>

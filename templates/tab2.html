@@ -1,0 +1,29 @@
+<h3>
+	Multiple sortable containers
+</h3>
+<p>
+	This example shows the usage of <a href="https://github.com/kamilkp/angular-sortable-view">angular-sortable-view</a> with multiple sortable lists. Each item can be moved either within its list or between them.
+</p>
+<div class="row">
+	<div class="col-xs-6">
+		<div sv-root class="multi-sortable">
+			<div class="sortable-container" sv-part="data.items2">
+				<div ng-repeat="item in data.items2" sv-element class="well multi">
+					{{item}}
+				</div>
+			</div>
+			<div class="sortable-container" sv-part="data.items3">
+				<div ng-repeat="item in data.items3" sv-element class="well multi">
+					{{item}}
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="col-xs-6">
+		<h4>HTML:</h4>
+		<pre class="prettyprint" highlight-on-load="example2Source"></pre>
+		<h4>Model:</h4>
+		<pre class="prettyprint lang-js color-white" ng-bind="printArray(data.items2)"></pre>
+		<pre class="prettyprint lang-js color-white" ng-bind="printArray(data.items3)"></pre>
+	</div>
+</div>

@@ -1,0 +1,26 @@
+<h3>
+	Float-based grid sortable with optional handles
+</h3>
+<p>
+	This example shows the usage of <a href="https://github.com/kamilkp/angular-sortable-view">angular-sortable-view</a> with float-based grid.
+</p>
+<div class="row">
+	<div class="col-xs-6">
+		<label style="margin-bottom: 10px;">
+			<input type="checkbox" ng-model="containmentFlag" ng-change="containmentChange(containmentFlag)"/>
+			Contain sorting to yellow container
+		</label>
+		<div class="sortable-container grid" sv-root sv-part="data.items4">
+			<div ng-repeat="item in data.items4" sv-element="opts" class="well grid">
+				{{item}}
+				<span sv-handle>handle</span>
+			</div>
+		</div>
+	</div>
+	<div class="col-xs-6">
+		<h4>HTML:</h4>
+		<pre class="prettyprint" highlight-on-load="example3Source"></pre>
+		<h4>Model:</h4>
+		<pre class="prettyprint lang-js color-white" ng-bind="printArray(data.items4)"></pre>
+	</div>
+</div>

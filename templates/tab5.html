@@ -1,0 +1,35 @@
+<h3>
+	Custom helpers
+</h3>
+<p>
+	This example shows the usage of <a href="https://github.com/kamilkp/angular-sortable-view">angular-sortable-view</a> with custom helpers. Note that you can define a helper per sortable part, or per element separately and even use angular bindings there.
+</p>
+<div class="row">
+	<div class="col-xs-6">
+		<div sv-root class="multi-sortable">
+			<div class="sortable-container" sv-part="data.items6">
+				<div sv-helper class="helper-left">
+					custom left helper
+				</div>
+				<div ng-repeat="item in data.items6" sv-element class="well multi">
+					{{item}}
+				</div>
+			</div>
+			<div class="sortable-container" sv-part="data.items7">
+				<div ng-repeat="item in data.items7" sv-element class="well multi">
+					<div sv-helper class="helper-right">
+						custom right helper {{item}}
+					</div>
+					{{item}}
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="col-xs-6">
+		<h4>HTML:</h4>
+		<pre class="prettyprint" highlight-on-load="example5Source"></pre>
+		<h4>Model:</h4>
+		<pre class="prettyprint lang-js color-white" ng-bind="printArray(data.items6)"></pre>
+		<pre class="prettyprint lang-js color-white" ng-bind="printArray(data.items7)"></pre>
+	</div>
+</div>

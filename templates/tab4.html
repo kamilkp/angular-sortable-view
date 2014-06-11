@@ -1,0 +1,30 @@
+<h3>
+	Multiple multi-sortable lists
+</h3>
+<p>
+	This example shows the usage of <a href="https://github.com/kamilkp/angular-sortable-view">angular-sortable-view</a> with multiple multi-sortable lists. <b>The first column is connected with the third</b>, and <b>the second is connected with the fourth</b>.
+</p>
+<p>
+	In order to connect sortable roots (elements with <span class="syntax">sv-root</span> attribute) you need to provide the value of the <span class="syntax">sv-root</span> attribute. It will be an identifier that groups them together. If no value for this attribute is provided then only parts (elements with <span class="syntax">sv-part</span> attribute) with the common <span class="syntax">sv-root</span> ancestor will be connected with each other. In case of this example the groups are identified by two identifiers: <span class="syntax">multiple_false</span> and <span class="syntax">multiple_true</span> (it just takes advantage of the <span class="syntax">ngRepeat</span>'s inner <span class="syntax">$odd</span> property that alternates between true and false).
+</p>
+<br>
+<div class="row">
+	<div class="col-xs-6">
+		<div class="multi-multi-sortable" ng-repeat="foo in [0, 1, 2, 3]">
+			<div class="sortable-container" sv-root="multiple_{{$odd}}" sv-part="data.items5[$index]">
+				<div ng-repeat="item in data.items5[$index]" sv-element class="well multi">
+					{{item}}
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="col-xs-6">
+		<h4>HTML:</h4>
+		<pre class="prettyprint" highlight-on-load="example4Source"></pre>
+		<h4>Model:</h4>
+		<pre class="prettyprint lang-js color-white" ng-bind="printArray(data.items5[0])"></pre>
+		<pre class="prettyprint lang-js color-white" ng-bind="printArray(data.items5[1])"></pre>
+		<pre class="prettyprint lang-js color-white" ng-bind="printArray(data.items5[2])"></pre>
+		<pre class="prettyprint lang-js color-white" ng-bind="printArray(data.items5[3])"></pre>
+	</div>
+</div>
