@@ -75,7 +75,7 @@
 					});
 				});
 
-				this.$moveUpdate = function(opts, mouse, svElement, svOriginal){
+				this.$moveUpdate = function(opts, mouse, svElement, svOriginal, svPlaceholder){
 					var svRect = svElement[0].getBoundingClientRect();
 					if(opts.tolerance === 'element')
 						mouse = {
@@ -86,15 +86,20 @@
 					sortingInProgress = true;
 					candidates = [];
 					if(!$placeholder){
-						// default placeholder
-						$placeholder = svOriginal.clone();
-						$placeholder.addClass('sv-visibility-hidden');
+						if(svPlaceholder){ // custom placeholder
+							$placeholder = svPlaceholder.clone();
+							$placeholder.removeClass('ng-hide');
+						}
+						else{ // default placeholder
+							$placeholder = svOriginal.clone();
+							$placeholder.addClass('sv-visibility-hidden');
+							$placeholder.addClass('sv-placeholder');
+							$placeholder.css({
+								'height': svRect.height + 'px',
+								'width': svRect.width + 'px'
+							});
+						}
 
-						$placeholder.addClass('sv-placeholder');
-						$placeholder.css({
-							'height': svRect.height + 'px',
-							'width': svRect.width + 'px'
-						});
 						svOriginal.after($placeholder);
 						svOriginal.addClass('ng-hide').addClass('sv-source');
 						svOriginal.removeClass('sv-visibility-hidden');
@@ -104,7 +109,22 @@
 						options = opts;
 						$helper = svElement;
 					}
+
+					// ----- move the element
+					$helper[0].reposition({
+						x: mouse.x + document.body.scrollLeft - mouse.offset.x*svRect.width,
+						y: mouse.y + document.body.scrollTop - mouse.offset.y*svRect.height
+					}, true /* absolute position provided */);
+
+					// ----- manage candidates
 					getSortableElements(mapKey).forEach(function(se, index){
+						if(opts.containment != null){
+							// TODO: optimize this since it could be calculated only once when the moving begins
+							if(
+								!elementMatchesSelector(se.element, opts.containment) &&
+								!elementMatchesSelector(se.element, opts.containment + ' *')
+							) return; // element is not within allowed containment
+						}
 						var rect = se.element[0].getBoundingClientRect();
 						var center = {
 							x: ~~(rect.left + rect.width/2),
@@ -324,6 +344,13 @@
 					}
 				});
 
+				var placeholder;
+				$scope.$watch('$ctrl.placeholder', function(customPlaceholder){
+					if(customPlaceholder){
+						placeholder = customPlaceholder;
+					}
+				});
+
 				var body = angular.element(document.body);
 				var html = angular.element(document.documentElement);
 				
@@ -346,6 +373,7 @@
 					var clone;
 
 					if(!helper) helper = $controllers[0].helper;
+					if(!placeholder) placeholder = $controllers[0].placeholder;
 					if(helper){
 						clone = helper.clone();
 						clone.removeClass('ng-hide');
@@ -371,24 +399,25 @@
 						var targetLeft = leftPx + coords.x;
 						var targetTop = topPx + coords.y;
 						var helperRect = clone[0].getBoundingClientRect();
+						var body = document.body;
 
 						if(containmentRect){
-							if(targetTop < containmentRect.top + document.body.scrollTop) // top boundary
-								targetTop = containmentRect.top + document.body.scrollTop;
-							if(targetTop + helperRect.height > containmentRect.top + document.body.scrollTop + containmentRect.height) // bottom boundary
-								targetTop = containmentRect.top + document.body.scrollTop + containmentRect.height - helperRect.height;
-							if(targetLeft < containmentRect.left + document.body.scrollLeft) // left boundary
-								targetLeft = containmentRect.left + document.body.scrollLeft;
-							if(targetLeft + helperRect.width > containmentRect.left + document.body.scrollLeft + containmentRect.width) // right boundary
-								targetLeft = containmentRect.left + document.body.scrollLeft + containmentRect.width - helperRect.width;
+							if(targetTop < containmentRect.top + body.scrollTop) // top boundary
+								targetTop = containmentRect.top + body.scrollTop;
+							if(targetTop + helperRect.height > containmentRect.top + body.scrollTop + containmentRect.height) // bottom boundary
+								targetTop = containmentRect.top + body.scrollTop + containmentRect.height - helperRect.height;
+							if(targetLeft < containmentRect.left + body.scrollLeft) // left boundary
+								targetLeft = containmentRect.left + body.scrollLeft;
+							if(targetLeft + helperRect.width > containmentRect.left + body.scrollLeft + containmentRect.width) // right boundary
+								targetLeft = containmentRect.left + body.scrollLeft + containmentRect.width - helperRect.width;
 						}
 						this.style.left = targetLeft + 'px';
 						this.style.top = targetTop + 'px';
 					};
 
 					var pointerOffset = {
-						x: e.clientX - clientRect.left,
-						y: e.clientY - clientRect.top
+						x: (e.clientX - clientRect.left)/clientRect.width,
+						y: (e.clientY - clientRect.top)/clientRect.height
 					};
 					html.addClass('sv-sorting-in-progress');
 					html.on('mousemove', onMousemove).on('mouseup', function mouseup(e){
@@ -398,18 +427,13 @@
 						$controllers[0].$drop($scope.$index, opts);
 					});
 
-					$controllers[1].$moveUpdate(opts, {x: e.clientX, y: e.clientY}, clone, $element);
-
+					onMousemove(e);
 					function onMousemove(e){
-						// ----- move the element
-						var pos = {
-							x: e.clientX + document.body.scrollLeft - pointerOffset.x,
-							y: e.clientY + document.body.scrollTop - pointerOffset.y
-						};
-						clone[0].reposition(pos, true /* absolute position provided */);
-
-						// ----- reorganize placeholders
-						$controllers[1].$moveUpdate(opts, {x: e.clientX, y: e.clientY}, clone, $element);
+						$controllers[1].$moveUpdate(opts, {
+							x: e.clientX,
+							y: e.clientY,
+							offset: pointerOffset
+						}, clone, $element, placeholder);
 					}
 				}
 			}
@@ -435,6 +459,19 @@
 					$ctrl[1].helper = $element;
 				else if($ctrl[0])
 					$ctrl[0].helper = $element;
+			}
+		};
+	});
+
+	module.directive('svPlaceholder', function(){
+		return {
+			require: ['?^svPart', '?^svElement'],
+			link: function($scope, $element, $attrs, $ctrl){
+				$element.addClass('sv-placeholder').addClass('ng-hide');
+				if($ctrl[1])
+					$ctrl[1].placeholder = $element;
+				else if($ctrl[0])
+					$ctrl[0].placeholder = $element;
 			}
 		};
 	});
@@ -485,5 +522,23 @@
 		else{
 			element.parent().prepend(newElement);
 		}
+	}
+
+	var dde = document.documentElement,
+	matchingFunction = dde.matches ? 'matches' :
+						dde.matchesSelector ? 'matchesSelector' :
+						dde.webkitMatches ? 'webkitMatches' :
+						dde.webkitMatchesSelector ? 'webkitMatchesSelector' :
+						dde.msMatches ? 'msMatches' :
+						dde.msMatchesSelector ? 'msMatchesSelector' :
+						dde.mozMatches ? 'mozMatches' :
+						dde.mozMatchesSelector ? 'mozMatchesSelector' : null;
+	if(matchingFunction == null)
+		throw 'This browser doesn\'t support the HTMLElement.matches method';
+
+	function elementMatchesSelector(element, selector){
+		if(element instanceof angular.element) element = element[0];
+		if(matchingFunction !== null)
+			return element[matchingFunction](selector);
 	}
 })(window, window.angular);
