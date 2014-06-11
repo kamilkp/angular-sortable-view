@@ -7,6 +7,8 @@ Demo: http://kamilkp.github.io/angular-sortable-view/
 
 You can find the source code for this demo on branch "gh-pages".
 
+Also see the changelog [here](https://github.com/kamilkp/angular-sortable-view/blob/master/CHANGELOG.md)
+
 ###DESCRIPTION:
 
 This is a simple library written as a module for [AngularJS](https://github.com/angular/angular.js) for sorting elements in the UI. It supports both single elements list, and multiple connected lists, where an element can be moved from one to another.
