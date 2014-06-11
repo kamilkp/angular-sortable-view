@@ -8,30 +8,25 @@
 	/* jshint eqnull:true */
 	/* jshint -W041 */
 
-	var module = angular.module('sortableView', []);
+	var module = angular.module('angular-sortable-view', []);
 	module.directive('svRoot', [function(){
 		function shouldBeAfter(elem, pointer, isGrid){
-			if(isGrid)
-				return elem.x - pointer.x < 0;
-			else
-				return elem.y - pointer.y < 0;
+			return isGrid ? elem.x - pointer.x < 0 : elem.y - pointer.y < 0;
+		}
+		function getSortableElements(key){
+			return ROOTS_MAP[key];
+		}
+		function removeSortableElements(key){
+			delete ROOTS_MAP[key];
 		}
 
-		var ROOTS_MAP = Object.create(null);
-		// window.ROOTS_MAP = ROOTS_MAP;
-
 		var sortingInProgress;
+		var ROOTS_MAP = Object.create(null);
+		// window.ROOTS_MAP = ROOTS_MAP; // for debug purposes
 
 		return {
 			restrict: 'A',
 			controller: ['$scope', '$attrs', '$interpolate', function($scope, $attrs, $interpolate){
-				function getSortableElements(key){
-					return ROOTS_MAP[key];
-				}
-				function removeSortableElements(key){
-					delete ROOTS_MAP[key];
-				}
-
 				var mapKey = $interpolate($attrs.svRoot)($scope) || $scope.$id;
 				if(!ROOTS_MAP[mapKey]) ROOTS_MAP[mapKey] = [];
 
@@ -53,7 +48,9 @@
 					return getSortableElements(mapKey);
 				}, function(collection){
 					isGrid = false;
-					var array = collection.map(function(item){
+					var array = collection.filter(function(item){
+						return !item.container;
+					}).map(function(item){
 						return {
 							part: item.getPart().id,
 							y: item.element[0].getBoundingClientRect().top
@@ -77,19 +74,29 @@
 						});
 					});
 				});
+
 				this.$moveUpdate = function(opts, mouse, svElement, svOriginal){
+					var svRect = svElement[0].getBoundingClientRect();
+					if(opts.tolerance === 'element')
+						mouse = {
+							x: ~~(svRect.left + svRect.width/2),
+							y: ~~(svRect.top + svRect.height/2)
+						};
+
 					sortingInProgress = true;
 					candidates = [];
 					if(!$placeholder){
-						var svRect = svElement[0].getBoundingClientRect();
+						// default placeholder
 						$placeholder = svOriginal.clone();
+						$placeholder.addClass('sv-visibility-hidden');
+
 						$placeholder.addClass('sv-placeholder');
 						$placeholder.css({
 							'height': svRect.height + 'px',
 							'width': svRect.width + 'px'
 						});
 						svOriginal.after($placeholder);
-						svOriginal.addClass('ng-hide');
+						svOriginal.addClass('ng-hide').addClass('sv-source');
 						svOriginal.removeClass('sv-visibility-hidden');
 
 						// cache options, helper and original element reference
@@ -113,7 +120,7 @@
 								after: shouldBeAfter(center, mouse, isGrid)
 							});
 						}
-						if(se.container && !se.element[0].querySelector('[sv-element]')){ // empty container
+						if(se.container && !se.element[0].querySelector('[sv-element]:not(.sv-placeholder):not(.sv-source)')){ // empty container
 							candidates.push({
 								element: se.element,
 								q: (center.x - mouse.x)*(center.x - mouse.x) + (center.y - mouse.y)*(center.y - mouse.y),
@@ -140,19 +147,11 @@
 					candidates.forEach(function(cand, index){
 						if(index === 0 && !cand.placeholder && !cand.container){
 							$target = cand;
-							if(cand.after){
-								cand.element.after($placeholder);
-							}
-							else{
-								var prevSibl = getPreviousSibling(cand.element);
-								if(prevSibl.length > 0){
-									prevSibl.after($placeholder);
-								}
-								else{
-									cand.element.parent().prepend($placeholder);
-								}
-							}
 							cand.element.addClass('sv-candidate');
+							if(cand.after)
+								cand.element.after($placeholder);
+							else
+								insertElementBefore(cand.element, $placeholder);
 						}
 						else if(index === 0 && cand.container){
 							$target = cand;
@@ -183,7 +182,7 @@
 						sortingInProgress = false;
 						$placeholder.remove();
 						$helper.remove();
-						$original.removeClass('ng-hide');
+						$original.removeClass('ng-hide').removeClass('sv-source');
 
 						candidates = void 0;
 						$placeholder = void 0;
@@ -194,9 +193,11 @@
 						if($target){
 							$target.element.removeClass('sv-candidate');
 							var spliced = originatingPart.model(originatingPart.scope).splice(index, 1);
-							var targetIndex = ($target.view === originatingPart && $target.targetIndex > index) ?
-								$target.targetIndex - 1 : $target.targetIndex;
-							if($target.after) targetIndex++;
+							var targetIndex = $target.targetIndex;
+							if($target.view === originatingPart && $target.targetIndex > index)
+								targetIndex--;
+							if($target.after)
+								targetIndex++;
 							$target.view.model($target.view.scope).splice(targetIndex, 0, spliced[0]);
 							if(!$scope.$root.$$phase) $scope.$apply();
 						}
@@ -240,7 +241,6 @@
 					if($helper){
 						$helper[0].reposition(diff);
 					}
-
 					_prevScroll = _scroll;
 				}
 			}]
@@ -252,13 +252,13 @@
 			restrict: 'A',
 			require: '^svRoot',
 			controller: ['$scope', function($scope){
+				$scope.$ctrl = this;
 				this.getPart = function(){
 					return $scope.part;
 				};
 				this.$drop = function(index, options){
 					$scope.$sortableRoot.$drop($scope.part, index, options);
 				};
-				$scope.$ctrl = this;
 			}],
 			scope: true,
 			link: function($scope, $element, $attrs, $sortable){
@@ -276,9 +276,7 @@
 
 				var sortablePart = {
 					element: $element,
-					getPart: function(){
-						return $scope.part;
-					},
+					getPart: $scope.$ctrl.getPart,
 					container: true
 				};
 				$sortable.addToSortableElements(sortablePart);
@@ -299,9 +297,7 @@
 			link: function($scope, $element, $attrs, $controllers){
 				var sortableElement = {
 					element: $element,
-					getPart: function(){
-						return $controllers[0].getPart();
-					},
+					getPart: $controllers[0].getPart,
 					getIndex: function(){
 						return $scope.$index;
 					}
@@ -342,8 +338,7 @@
 						containment: 'html'
 					}, opts);
 					if(opts.containment){
-						opts.containment = document.querySelector(opts.containment);
-						var containmentRect = opts.containment.getBoundingClientRect();
+						var containmentRect = document.querySelector(opts.containment).getBoundingClientRect();
 					}
 
 					var target = $element;
@@ -423,9 +418,10 @@
 
 	module.directive('svHandle', function(){
 		return {
-			require: '^svElement',
+			require: '?^svElement',
 			link: function($scope, $element, $attrs, $ctrl){
-				$ctrl.handle = $element;
+				if($ctrl)
+					$ctrl.handle = $element;
 			}
 		};
 	});
@@ -439,8 +435,6 @@
 					$ctrl[1].helper = $element;
 				else if($ctrl[0])
 					$ctrl[0].helper = $element;
-				else
-					throw 'svHelper is not nested inside svPart or svElement';
 			}
 		};
 	});
@@ -456,7 +450,7 @@
 		'.sv-candidate{' +
 		'}' +
 		'.sv-placeholder{' +
-			'opacity: 0;' +
+			// 'opacity: 0;' +
 		'}' +
 		'.sv-sorting-in-progress{' +
 			'-webkit-user-select: none;' +
@@ -465,7 +459,8 @@
 			'user-select: none;' +
 		'}' +
 		'.sv-visibility-hidden{' +
-			'visibility: hidden;' +
+			'visibility: hidden !important;' +
+			'opacity: 0 !important;' +
 		'}' +
 		'</style>'
 	].join(''));
@@ -479,6 +474,16 @@
 			while(sib != null && sib.nodeType != 1)
 				sib = sib.previousSibling;
 			return angular.element(sib);
+		}
+	}
+
+	function insertElementBefore(element, newElement){
+		var prevSibl = getPreviousSibling(element);
+		if(prevSibl.length > 0){
+			prevSibl.after(newElement);
+		}
+		else{
+			element.parent().prepend(newElement);
 		}
 	}
 })(window, window.angular);
