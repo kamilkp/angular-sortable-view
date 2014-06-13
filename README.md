@@ -105,6 +105,7 @@ The API is declarative. There are four directives (hooked on attributes) that ne
 		{{item}}
 	</div>
 </div>
+```
 
 ###Example of using custom placeholders per part
 
