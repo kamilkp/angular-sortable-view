@@ -1,6 +1,6 @@
 //
 // Copyright Kamil Pękala http://github.com/kamilkp
-// angular-sortable-view v0.0.3 2014/06/11
+// angular-sortable-view v0.0.2 2014/06/11
 //
 
 ;(function(window, angular){
@@ -185,11 +185,20 @@
 				this.$drop = function(originatingPart, index, options){
 					if(options.revert){
 						var placeholderRect = $placeholder[0].getBoundingClientRect();
+						var helperRect = $helper[0].getBoundingClientRect();
+						var distance = Math.sqrt(
+							Math.pow(helperRect.top - placeholderRect.top, 2) +
+							Math.pow(helperRect.left - placeholderRect.left, 2)
+						);
+
+						var duration = +options.revert*distance/200; // constant speed: duration depends on distance
+						duration = Math.min(duration, +options.revert); // however it's not longer that options.revert
+
 						['-webkit-', '-moz-', '-ms-', '-o-', ''].forEach(function(prefix){
 							if(typeof $helper[0].style[prefix + 'transition'] !== "undefined")
-								$helper[0].style[prefix + 'transition'] = 'all ' + options.revert + 'ms ease';
+								$helper[0].style[prefix + 'transition'] = 'all ' + duration + 'ms ease';
 						});
-						setTimeout(afterRevert, +options.revert);
+						setTimeout(afterRevert, duration);
 						$helper.css({
 							'top': placeholderRect.top + document.body.scrollTop + 'px',
 							'left': placeholderRect.left + document.body.scrollLeft + 'px'
@@ -365,7 +374,7 @@
 						containment: 'html'
 					}, opts);
 					if(opts.containment){
-						var containmentRect = document.querySelector(opts.containment).getBoundingClientRect();
+						var containmentRect = closestElement.call($element, opts.containment)[0].getBoundingClientRect();
 					}
 
 					var target = $element;
@@ -541,4 +550,16 @@
 		if(matchingFunction !== null)
 			return element[matchingFunction](selector);
 	}
+
+	var closestElement = angular.element.prototype.closest || function (selector){
+		var el = this[0].parentNode;
+		while(el !== document.documentElement && !el[matchingFunction](selector))
+			el = el.parentNode;
+
+		if(el[matchingFunction](selector))
+			return angular.element(el);
+		else
+			return angular.element();
+	};
+
 })(window, window.angular);
