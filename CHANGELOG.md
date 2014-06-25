@@ -3,6 +3,7 @@ Version 0.0.4 - 2014/06/25
 
   * Fixed the issue with helper styles
   * Dropped the need for the browser to support pointer-events CSS property
+  * Added the project to the bower registy, it is available to download via `bower install angular-sortable-view`
 
 Version 0.0.3 - 2014/06/11
 ================
