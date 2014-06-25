@@ -1,4 +1,4 @@
-angular-sortable-view v0.0.4
+angular-sortable-view v0.0.4 [![Bower version](https://badge.fury.io/bo/angular-vs-repeat.svg)](http://badge.fury.io/bo/angular-vs-repeat)
 =================
 
 Fully declarative (multi)sortable for AngularJS
