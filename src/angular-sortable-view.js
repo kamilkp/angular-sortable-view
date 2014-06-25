@@ -1,6 +1,6 @@
 //
 // Copyright Kamil Pękala http://github.com/kamilkp
-// angular-sortable-view v0.0.2 2014/06/11
+// angular-sortable-view v0.0.4 2014/06/25
 //
 
 ;(function(window, angular){
@@ -114,7 +114,7 @@
 					$helper[0].reposition({
 						x: mouse.x + document.body.scrollLeft - mouse.offset.x*svRect.width,
 						y: mouse.y + document.body.scrollTop - mouse.offset.y*svRect.height
-					}, true /* absolute position provided */);
+					});
 
 					// ----- manage candidates
 					getSortableElements(mapKey).forEach(function(se, index){
@@ -247,31 +247,6 @@
 							removeSortableElements(mapKey);
 					}
 				};
-
-				var windowElement = angular.element(window);
-				windowElement.on('scroll', scrollHandler);
-				$scope.$on('$destroy', function(){
-					windowElement.off('off', scrollHandler);
-				});
-				
-				var _prevScroll = {
-					top: document.body.scrollTop,
-					left: document.body.scrollLeft
-				};
-				function scrollHandler(e){
-					var _scroll = {
-						top: document.body.scrollTop,
-						left: document.body.scrollLeft
-					};
-					var diff = {
-						x: _scroll.left - _prevScroll.left,
-						y: _scroll.top - _prevScroll.top
-					};
-					if($helper){
-						$helper[0].reposition(diff);
-					}
-					_prevScroll = _scroll;
-				}
 			}]
 		};
 	}]);
@@ -401,12 +376,10 @@
 						});
 					}
 
-					body.append(clone);
-					clone[0].reposition = function(coords, absolute){
-						var leftPx = absolute ? 0 : +this.style.left.slice(0, -2);
-						var topPx = absolute ? 0 : +this.style.top.slice(0, -2);
-						var targetLeft = leftPx + coords.x;
-						var targetTop = topPx + coords.y;
+					$element.after(clone);
+					clone[0].reposition = function(coords){
+						var targetLeft = coords.x;
+						var targetTop = coords.y;
 						var helperRect = clone[0].getBoundingClientRect();
 						var body = document.body;
 
@@ -420,8 +393,8 @@
 							if(targetLeft + helperRect.width > containmentRect.left + body.scrollLeft + containmentRect.width) // right boundary
 								targetLeft = containmentRect.left + body.scrollLeft + containmentRect.width - helperRect.width;
 						}
-						this.style.left = targetLeft + 'px';
-						this.style.top = targetTop + 'px';
+						this.style.left = targetLeft - body.scrollLeft + 'px';
+						this.style.top = targetTop - body.scrollTop + 'px';
 					};
 
 					var pointerOffset = {
@@ -488,10 +461,9 @@
 	angular.element(document.head).append([
 		'<style>' +
 		'.sv-helper{' +
-			'position: absolute;' +
+			'position: fixed;' +
 			'z-index: 99999;' +
 			'margin: 0 !important;' +
-			'pointer-events: none;' +
 		'}' +
 		'.sv-candidate{' +
 		'}' +

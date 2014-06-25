@@ -1,4 +1,4 @@
-angular-sortable-view v0.0.3
+angular-sortable-view v0.0.4
 =================
 
 Fully declarative (multi)sortable for AngularJS

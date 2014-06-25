@@ -1,3 +1,9 @@
+Version 0.0.4 - 2014/06/25
+================
+
+  * Fixed the issue with helper styles
+  * Dropped the need for the browser to support pointer-events CSS property
+
 Version 0.0.3 - 2014/06/11
 ================
 
