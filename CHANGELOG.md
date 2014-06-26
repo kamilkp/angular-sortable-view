@@ -1,3 +1,8 @@
+Version 0.0.5 - 2014/06/26
+================
+
+  * source element for sorting is now detached from DOM instead of giving him `display: none`
+
 Version 0.0.4 - 2014/06/25
 ================
 
