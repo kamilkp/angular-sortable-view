@@ -1,6 +1,6 @@
 //
 // Copyright Kamil Pękala http://github.com/kamilkp
-// angular-sortable-view v0.0.4 2014/06/25
+// angular-sortable-view v0.0.5 2014/06/26
 //
 
 ;(function(window, angular){
@@ -37,43 +37,51 @@
 				var $helper; // helper element - the one thats being dragged around with the mouse pointer
 				var $original; // original element
 				var $target; // last best candidate
+				var svOriginalNextSibling; // original element's original next sibling node
 				var isGrid = false;
 
 				this.sortingInProgress = function(){
 					return sortingInProgress;
 				};
 
-				// check if at least one of the lists have a grid like layout
-				$scope.$watchCollection(function(){
-					return getSortableElements(mapKey);
-				}, function(collection){
-					isGrid = false;
-					var array = collection.filter(function(item){
-						return !item.container;
-					}).map(function(item){
-						return {
-							part: item.getPart().id,
-							y: item.element[0].getBoundingClientRect().top
-						};
-					});
-					var dict = Object.create(null);
-					array.forEach(function(item){
-						if(dict[item.part])
-							dict[item.part].push(item.y);
-						else
-							dict[item.part] = [item.y];
-					});
-					Object.keys(dict).forEach(function(key){
-						dict[key].sort();
-						dict[key].forEach(function(item, index){
-							if(index < dict[key].length - 1){
-								if(item > 0 && item === dict[key][index + 1]){
-									isGrid = true;
+				if($attrs.svGrid){ // sv-grid determined explicite
+					isGrid = $attrs.svGrid === "true" ? true : $attrs.svGrid === "false" ? false : null;
+					if(isGrid === null)
+						throw 'Invalid value of sv-grid attribute';
+				}
+				else{
+					// check if at least one of the lists have a grid like layout
+					$scope.$watchCollection(function(){
+						return getSortableElements(mapKey);
+					}, function(collection){
+						isGrid = false;
+						var array = collection.filter(function(item){
+							return !item.container;
+						}).map(function(item){
+							return {
+								part: item.getPart().id,
+								y: item.element[0].getBoundingClientRect().top
+							};
+						});
+						var dict = Object.create(null);
+						array.forEach(function(item){
+							if(dict[item.part])
+								dict[item.part].push(item.y);
+							else
+								dict[item.part] = [item.y];
+						});
+						Object.keys(dict).forEach(function(key){
+							dict[key].sort();
+							dict[key].forEach(function(item, index){
+								if(index < dict[key].length - 1){
+									if(item > 0 && item === dict[key][index + 1]){
+										isGrid = true;
+									}
 								}
-							}
+							});
 						});
 					});
-				});
+				}
 
 				this.$moveUpdate = function(opts, mouse, svElement, svOriginal, svPlaceholder){
 					var svRect = svElement[0].getBoundingClientRect();
@@ -100,8 +108,10 @@
 							});
 						}
 
+						svOriginalNextSibling = svOriginal[0].nextSibling;
 						svOriginal.after($placeholder);
-						svOriginal.addClass('ng-hide').addClass('sv-source');
+
+					    svOriginal[0].parentNode.removeChild(svOriginal[0]);
 						svOriginal.removeClass('sv-visibility-hidden');
 
 						// cache options, helper and original element reference
@@ -211,7 +221,7 @@
 						sortingInProgress = false;
 						$placeholder.remove();
 						$helper.remove();
-						$original.removeClass('ng-hide').removeClass('sv-source');
+						svOriginalNextSibling.parentNode.insertBefore($original[0], svOriginalNextSibling);
 
 						candidates = void 0;
 						$placeholder = void 0;
@@ -376,7 +386,7 @@
 						});
 					}
 
-					$element.after(clone);
+					$element.parent().prepend(clone);
 					clone[0].reposition = function(coords){
 						var targetLeft = coords.x;
 						var targetTop = coords.y;
@@ -461,7 +471,7 @@
 	angular.element(document.head).append([
 		'<style>' +
 		'.sv-helper{' +
-			'position: fixed;' +
+			'position: fixed !important;' +
 			'z-index: 99999;' +
 			'margin: 0 !important;' +
 		'}' +
