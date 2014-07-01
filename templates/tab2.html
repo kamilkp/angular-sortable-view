@@ -6,7 +6,7 @@
 </p>
 <div class="row">
 	<div class="col-xs-6">
-		<div sv-root class="multi-sortable">
+		<div sv-root class="multi-sortable" sv-on-sort="onSorted($item, $partFrom, $partTo, $indexFrom, $indexTo)" sv-on-start="onStarted($index, $item, $helper, $part)">
 			<div class="sortable-container" sv-part="data.items2">
 				<div ng-repeat="item in data.items2" sv-element class="well multi">
 					{{item}}

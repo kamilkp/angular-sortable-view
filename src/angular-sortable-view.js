@@ -1,6 +1,6 @@
 //
 // Copyright Kamil Pękala http://github.com/kamilkp
-// angular-sortable-view v0.0.5 2014/06/26
+// angular-sortable-view v0.0.7 2014/07/02
 //
 
 ;(function(window, angular){
@@ -26,7 +26,7 @@
 
 		return {
 			restrict: 'A',
-			controller: ['$scope', '$attrs', '$interpolate', function($scope, $attrs, $interpolate){
+			controller: ['$scope', '$attrs', '$interpolate', '$parse', function($scope, $attrs, $interpolate, $parse){
 				var mapKey = $interpolate($attrs.svRoot)($scope) || $scope.$id;
 				if(!ROOTS_MAP[mapKey]) ROOTS_MAP[mapKey] = [];
 
@@ -39,6 +39,14 @@
 				var $target; // last best candidate
 				var svOriginalNextSibling; // original element's original next sibling node
 				var isGrid = false;
+				var onSort = $parse($attrs.svOnSort);
+
+				// ----- hack due to https://github.com/angular/angular.js/issues/8044
+				$attrs.svOnStart = $attrs.$$element[0].attributes['sv-on-start'];
+				$attrs.svOnStart = $attrs.svOnStart && $attrs.svOnStart.value; 
+				// -------------------------------------------------------------------
+
+				var onStart = $parse($attrs.svOnStart);
 
 				this.sortingInProgress = function(){
 					return sortingInProgress;
@@ -83,7 +91,7 @@
 					});
 				}
 
-				this.$moveUpdate = function(opts, mouse, svElement, svOriginal, svPlaceholder){
+				this.$moveUpdate = function(opts, mouse, svElement, svOriginal, svPlaceholder, originatingPart, originatingIndex){
 					var svRect = svElement[0].getBoundingClientRect();
 					if(opts.tolerance === 'element')
 						mouse = {
@@ -118,6 +126,13 @@
 						$original = svOriginal;
 						options = opts;
 						$helper = svElement;
+
+						onStart($scope, {
+							$helper: $helper,
+							$part: originatingPart.model(originatingPart.scope),
+							$index: originatingIndex,
+							$item: originatingPart.model(originatingPart.scope)[originatingIndex]
+						});
 					}
 
 					// ----- move the element
@@ -238,6 +253,16 @@
 							if($target.after)
 								targetIndex++;
 							$target.view.model($target.view.scope).splice(targetIndex, 0, spliced[0]);
+
+							// sv-on-sort callback
+							if($target.view !== originatingPart || index !== targetIndex)
+								onSort($scope, {
+									$partTo: $target.view.model($target.view.scope),
+									$partFrom: originatingPart.model(originatingPart.scope),
+									$item: spliced[0],
+									$indexTo: targetIndex,
+									$indexFrom: index
+								});
 							if(!$scope.$root.$$phase) $scope.$apply();
 						}
 						
@@ -425,7 +450,7 @@
 							x: e.clientX,
 							y: e.clientY,
 							offset: pointerOffset
-						}, clone, $element, placeholder);
+						}, clone, $element, placeholder, $controllers[0].getPart(), $scope.$index);
 					}
 				}
 			}
