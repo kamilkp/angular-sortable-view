@@ -1,3 +1,8 @@
+Version 0.0.6 - 2014/07/01
+================
+
+  * You can now listen for resorting. An `sv-on-sort` attribute can be now placed on an element with `sv-root`. The expression passed as a value of that attribute will be evaluated when elements order has changed after sorting.
+
 Version 0.0.5 - 2014/06/26
 ================
 
