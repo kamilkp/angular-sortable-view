@@ -1,6 +1,6 @@
 //
 // Copyright Kamil Pękala http://github.com/kamilkp
-// angular-sortable-view v0.0.5 2014/06/26
+// angular-sortable-view v0.0.6 2014/07/01
 //
 
 ;(function(window, angular){
@@ -26,7 +26,7 @@
 
 		return {
 			restrict: 'A',
-			controller: ['$scope', '$attrs', '$interpolate', function($scope, $attrs, $interpolate){
+			controller: ['$scope', '$attrs', '$interpolate', '$parse', function($scope, $attrs, $interpolate, $parse){
 				var mapKey = $interpolate($attrs.svRoot)($scope) || $scope.$id;
 				if(!ROOTS_MAP[mapKey]) ROOTS_MAP[mapKey] = [];
 
@@ -39,6 +39,7 @@
 				var $target; // last best candidate
 				var svOriginalNextSibling; // original element's original next sibling node
 				var isGrid = false;
+				var onSort = $parse($attrs.svOnSort);
 
 				this.sortingInProgress = function(){
 					return sortingInProgress;
@@ -238,6 +239,10 @@
 							if($target.after)
 								targetIndex++;
 							$target.view.model($target.view.scope).splice(targetIndex, 0, spliced[0]);
+
+							// sv-on-sort callback
+							if($target.view === originatingPart && index !== targetIndex)
+								onSort($scope);
 							if(!$scope.$root.$$phase) $scope.$apply();
 						}
 						
