@@ -1,6 +1,24 @@
 Version 0.0.7 - 2014/07/02
+================
 
-  to do
+You can now use these optional attributes on the element with `sv-root`:
+  * `sv-on-sort` - The expression passed as a value of that attribute will be evaluated when elements order has changed after sorting. Several parameters can be injected there like: `sv-on-sort="foo($item, $partFrom, $partTo, $indexFrom, $indexTo)"` where:
+				<ul>
+					<li>`$item` is the item in model which has been moved</li>
+					<li>`$partFrom` is the part from which the $item originated</li>
+					<li>`$partTo` is the part to which the $item has been moved</li>
+					<li>`$indexFrom` is the previous index of the $item in $partFrom</li>
+					<li>`$indedTo` is the index of the $item in $partTo</li>
+				</ul>
+			</li>
+  * `sv-on-start` - The expression passed as a value of that attribute will be evaluated when a user starts moving an element. Several parameters can be injected there like: `sv-on-start="bar($item, $part, $index, $helper)"` where:
+				<ul>
+					<li>`$item` is the item in model which started being moved</li>
+					<li>`$part` is the part from which the $item originates</li>
+					<li>`$index` is the index of the $item in $part</li>
+					<li>`$helper` is the jqLite/jQuery object of an element that is being dragged around</li>
+				</ul>
+			</li>
 
 Version 0.0.6 - 2014/07/01
 ================
