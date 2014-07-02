@@ -1,4 +1,4 @@
-angular-sortable-view v0.0.6 [![Bower version](https://badge.fury.io/bo/angular-vs-repeat.svg)](http://badge.fury.io/bo/angular-vs-repeat)
+angular-sortable-view v0.0.7 [![Bower version](https://badge.fury.io/bo/angular-vs-repeat.svg)](http://badge.fury.io/bo/angular-vs-repeat)
 =================
 
 Fully declarative (multi)sortable for AngularJS
@@ -20,6 +20,24 @@ This library requires ***no dependencies whatsoever*** (except angular.js of cou
 The API is declarative. There are four directives (hooked on attributes) that need to be nested properly:
 
   * `sv-root` - this is where all the logic is happening. If multiple lists should be connected with each other so that elements can be moved between them and they have a common ancestor, put this attribute on that element. If not and you still want the multi-sortable behaviour a value for that attribue must be provided. That value will be used as an identifier to connect those roots together.
+    **Optional attributes:**
+    * `sv-on-sort` - The expression passed as a value of that attribute will be evaluated when elements order has changed after sorting. Several parameters can be injected there like: `sv-on-sort="foo($item, $partFrom, $partTo, $indexFrom, $indexTo)"` where:
+				<ul>
+					<li>`$item` is the item in model which has been moved</li>
+					<li>`$partFrom` is the part from which the $item originated</li>
+					<li>`$partTo` is the part to which the $item has been moved</li>
+					<li>`$indexFrom` is the previous index of the $item in $partFrom</li>
+					<li>`$indedTo` is the index of the $item in $partTo</li>
+				</ul>
+			</li>
+			<li>`sv-on-start` - The expression passed as a value of that attribute will be evaluated when a user starts moving an element. Several parameters can be injected there like: `sv-on-start="bar($item, $part, $index, $helper)"` where:
+				<ul>
+					<li>`$item` is the item in model which started being moved</li>
+					<li>`$part` is the part from which the $item originates</li>
+					<li>`$index` is the index of the $item in $part</li>
+					<li>`$helper` is the jqLite/jQuery object of an element that is being dragged around</li>
+				</ul>
+			</li>
   * `sv-part` - this attribute should be placed on an element that is a container for the `ngRepeat`'ed elements. Its value should be the same as the right hand side expression in `ng-repeat` attribute.
   * `sv-element` - this attribute should be placed on the same element as `ng-repeat` attribute. Its (optional) value should be an expression that evaluates to the options object.
   * `sv-handle` - this attribute is optional. If needed it can be placed on an element within the sortable element. This element will be the handle for sorting operations.
