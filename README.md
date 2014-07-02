@@ -19,7 +19,7 @@ This library requires ***no dependencies whatsoever*** (except angular.js of cou
 
 The API is declarative. There are four directives (hooked on attributes) that need to be nested properly:
 
-  * `sv-root` - this is where all the logic is happening. If multiple lists should be connected with each other so that elements can be moved between them and they have a common ancestor, put this attribute on that element. If not and you still want the multi-sortable behaviour a value for that attribue must be provided. That value will be used as an identifier to connect those roots together. You can also add a `sv-on-sort` attribute to that element. The expression passed as a value of that attribute will be evaluated when elements order has changed after sorting.
+  * `sv-root` - this is where all the logic is happening. If multiple lists should be connected with each other so that elements can be moved between them and they have a common ancestor, put this attribute on that element. If not and you still want the multi-sortable behaviour a value for that attribue must be provided. That value will be used as an identifier to connect those roots together.
   * `sv-part` - this attribute should be placed on an element that is a container for the `ngRepeat`'ed elements. Its value should be the same as the right hand side expression in `ng-repeat` attribute.
   * `sv-element` - this attribute should be placed on the same element as `ng-repeat` attribute. Its (optional) value should be an expression that evaluates to the options object.
   * `sv-handle` - this attribute is optional. If needed it can be placed on an element within the sortable element. This element will be the handle for sorting operations.
@@ -76,7 +76,7 @@ The API is declarative. There are four directives (hooked on attributes) that ne
 <div sv-root sv-part="modelArray">
 	<div ng-repeat="item in modelArray" sv-element>
 		<div>{{item}}</div>
-		<span sv-handle></span>
+		<span sv-handle>`
 	</div>
 </div>
 ```

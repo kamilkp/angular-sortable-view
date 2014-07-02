@@ -40,6 +40,12 @@
 				var svOriginalNextSibling; // original element's original next sibling node
 				var isGrid = false;
 				var onSort = $parse($attrs.svOnSort);
+
+				// ----- hack due to https://github.com/angular/angular.js/issues/8044
+				$attrs.svOnStart = $attrs.$$element[0].attributes['sv-on-start'];
+				$attrs.svOnStart = $attrs.svOnStart && $attrs.svOnStart.value; 
+				// -------------------------------------------------------------------
+
 				var onStart = $parse($attrs.svOnStart);
 
 				this.sortingInProgress = function(){
@@ -122,10 +128,10 @@
 						$helper = svElement;
 
 						onStart($scope, {
-							$hepler: $helper,
-							$part: originatingPart,
+							$helper: $helper,
+							$part: originatingPart.model(originatingPart.scope),
 							$index: originatingIndex,
-							$item: originatingPart[originatingIndex]
+							$item: originatingPart.model(originatingPart.scope)[originatingIndex]
 						});
 					}
 
@@ -251,8 +257,8 @@
 							// sv-on-sort callback
 							if($target.view !== originatingPart || index !== targetIndex)
 								onSort($scope, {
-									$partTo: $target.view,
-									$partFrom: originatingPart,
+									$partTo: $target.view.model($target.view.scope),
+									$partFrom: originatingPart.model(originatingPart.scope),
 									$item: spliced[0],
 									$indexTo: targetIndex,
 									$indexFrom: index
