@@ -1,6 +1,6 @@
 //
 // Copyright Kamil Pękala http://github.com/kamilkp
-// angular-sortable-view v0.0.6 2014/07/01
+// angular-sortable-view v0.0.7 2014/07/02
 //
 
 ;(function(window, angular){
@@ -40,6 +40,7 @@
 				var svOriginalNextSibling; // original element's original next sibling node
 				var isGrid = false;
 				var onSort = $parse($attrs.svOnSort);
+				var onStart = $parse($attrs.svOnStart);
 
 				this.sortingInProgress = function(){
 					return sortingInProgress;
@@ -84,7 +85,7 @@
 					});
 				}
 
-				this.$moveUpdate = function(opts, mouse, svElement, svOriginal, svPlaceholder){
+				this.$moveUpdate = function(opts, mouse, svElement, svOriginal, svPlaceholder, originatingPart, originatingIndex){
 					var svRect = svElement[0].getBoundingClientRect();
 					if(opts.tolerance === 'element')
 						mouse = {
@@ -119,6 +120,13 @@
 						$original = svOriginal;
 						options = opts;
 						$helper = svElement;
+
+						onStart($scope, {
+							$hepler: $helper,
+							$part: originatingPart,
+							$index: originatingIndex,
+							$item: originatingPart[originatingIndex]
+						});
 					}
 
 					// ----- move the element
@@ -241,8 +249,14 @@
 							$target.view.model($target.view.scope).splice(targetIndex, 0, spliced[0]);
 
 							// sv-on-sort callback
-							if($target.view === originatingPart && index !== targetIndex)
-								onSort($scope);
+							if($target.view !== originatingPart || index !== targetIndex)
+								onSort($scope, {
+									$partTo: $target.view,
+									$partFrom: originatingPart,
+									$item: spliced[0],
+									$indexTo: targetIndex,
+									$indexFrom: index
+								});
 							if(!$scope.$root.$$phase) $scope.$apply();
 						}
 						
@@ -430,7 +444,7 @@
 							x: e.clientX,
 							y: e.clientY,
 							offset: pointerOffset
-						}, clone, $element, placeholder);
+						}, clone, $element, placeholder, $controllers[0].getPart(), $scope.$index);
 					}
 				}
 			}
