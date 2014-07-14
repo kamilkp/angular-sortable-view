@@ -208,6 +208,8 @@
 				};
 
 				this.$drop = function(originatingPart, index, options){
+					if(!$placeholder) return;
+
 					if(options.revert){
 						var placeholderRect = $placeholder[0].getBoundingClientRect();
 						var helperRect = $helper[0].getBoundingClientRect();
@@ -373,10 +375,13 @@
 				var body = angular.element(document.body);
 				var html = angular.element(document.documentElement);
 				
+				var moveExecuted;
+
 				function onMousedown(e){
 					if($controllers[1].sortingInProgress()) return;
 					if(e.button != 0) return;
 
+					moveExecuted = false;
 					var opts = $parse($attrs.svElement)($scope);
 					opts = angular.extend({}, {
 						tolerance: 'pointer',
@@ -411,7 +416,6 @@
 						});
 					}
 
-					$element.parent().prepend(clone);
 					clone[0].reposition = function(coords){
 						var targetLeft = coords.x;
 						var targetTop = coords.y;
@@ -441,11 +445,16 @@
 						html.off('mousemove', onMousemove);
 						html.off('mouseup', mouseup);
 						html.removeClass('sv-sorting-in-progress');
-						$controllers[0].$drop($scope.$index, opts);
+						if(moveExecuted)
+							$controllers[0].$drop($scope.$index, opts);
 					});
 
-					onMousemove(e);
+					// onMousemove(e);
 					function onMousemove(e){
+						if(!moveExecuted){
+							$element.parent().prepend(clone);
+							moveExecuted = true;
+						}
 						$controllers[1].$moveUpdate(opts, {
 							x: e.clientX,
 							y: e.clientY,
