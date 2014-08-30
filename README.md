@@ -27,7 +27,7 @@ The API is declarative. There are four directives (hooked on attributes) that ne
 					<li>`$partFrom` is the part from which the $item originated</li>
 					<li>`$partTo` is the part to which the $item has been moved</li>
 					<li>`$indexFrom` is the previous index of the $item in $partFrom</li>
-					<li>`$indedTo` is the index of the $item in $partTo</li>
+					<li>`$indexTo` is the index of the $item in $partTo</li>
 				</ul>
 			</li>
 			<li>`sv-on-start` - The expression passed as a value of that attribute will be evaluated when a user starts moving an element. Several parameters can be injected there like: `sv-on-start="bar($item, $part, $index, $helper)"` where:
