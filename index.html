@@ -217,6 +217,9 @@
 			$scope.onStarted = function(){
 				console.log(arguments);
 			};
+			$scope.onStopped = function(){
+				console.log(arguments);
+			};
 			$scope.example1Source = '<div class="sortable-container" sv-root sv-part="data.items1">\n' +
 									'	<div ng-repeat="item in data.items1" sv-element="opts" class="well">\n' +
 									'		{{item}}\n' +

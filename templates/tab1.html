@@ -13,7 +13,7 @@
 			<input type="checkbox" ng-model="containmentFlag" ng-change="containmentChange(containmentFlag)"/>
 			Contain sorting to yellow container
 		</label>
-		<div class="sortable-container" sv-root sv-on-sort="onSorted(data.items1);" sv-part="data.items1">
+		<div class="sortable-container" sv-root sv-on-sort="onSorted(data.items1);" sv-part="data.items1" sv-on-start="onStarted($part, $item, $index)" sv-on-stop="onStopped($part, $item, $index)">
 			<div ng-repeat="item in data.items1" sv-element="opts" class="well">
 				{{item}}
 			</div>

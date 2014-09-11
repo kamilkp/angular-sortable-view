@@ -1,6 +1,6 @@
 //
 // Copyright Kamil Pękala http://github.com/kamilkp
-// angular-sortable-view v0.0.7 2014/07/02
+// angular-sortable-view v0.0.8 2014/07/15
 //
 
 ;(function(window, angular){
@@ -44,9 +44,13 @@
 				// ----- hack due to https://github.com/angular/angular.js/issues/8044
 				$attrs.svOnStart = $attrs.$$element[0].attributes['sv-on-start'];
 				$attrs.svOnStart = $attrs.svOnStart && $attrs.svOnStart.value; 
+
+				$attrs.svOnStop = $attrs.$$element[0].attributes['sv-on-stop'];
+				$attrs.svOnStop = $attrs.svOnStop && $attrs.svOnStop.value; 
 				// -------------------------------------------------------------------
 
 				var onStart = $parse($attrs.svOnStart);
+				var onStop = $parse($attrs.svOnStop);				
 
 				this.sortingInProgress = function(){
 					return sortingInProgress;
@@ -133,6 +137,8 @@
 							$index: originatingIndex,
 							$item: originatingPart.model(originatingPart.scope)[originatingIndex]
 						});
+						if($scope.$root)
+							$scope.$root.$$phase || $scope.$apply();
 					}
 
 					// ----- move the element
@@ -246,6 +252,13 @@
 						$helper = void 0;
 						$original = void 0;
 						
+						// sv-on-stop callback
+						onStop($scope, {
+							$part: originatingPart.model(originatingPart.scope),
+							$index: index,
+							$item: originatingPart.model(originatingPart.scope)[index]
+						});
+
 						if($target){
 							$target.element.removeClass('sv-candidate');
 							var spliced = originatingPart.model(originatingPart.scope).splice(index, 1);
@@ -265,10 +278,12 @@
 									$indexTo: targetIndex,
 									$indexFrom: index
 								});
-							if(!$scope.$root.$$phase) $scope.$apply();
+
 						}
-						
 						$target = void 0;
+
+						if($scope.$root)
+							$scope.$root.$$phase || $scope.$apply();
 					}
 				};
 
