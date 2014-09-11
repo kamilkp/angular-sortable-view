@@ -38,6 +38,13 @@ The API is declarative. There are four directives (hooked on attributes) that ne
 					<li>`$helper` is the jqLite/jQuery object of an element that is being dragged around</li>
 				</ul>
 			</li>
+			<li>`sv-on-stop` - The expression passed as a value of that attribute will be evaluated when a user stops moving an element (drops it). This will be called regardless of the fact whether elements have been reordered or now. Several parameters can be injected there like: `sv-on-end="baz($item, $part, $index)"` where:
+				<ul>
+					<li>`$item` is the item in model which started being moved</li>
+					<li>`$part` is the part from which the $item originates</li>
+					<li>`$index` is the index of the $item in $part</li>
+				</ul>
+			</li>
   * `sv-part` - this attribute should be placed on an element that is a container for the `ngRepeat`'ed elements. Its value should be the same as the right hand side expression in `ng-repeat` attribute.
   * `sv-element` - this attribute should be placed on the same element as `ng-repeat` attribute. Its (optional) value should be an expression that evaluates to the options object.
   * `sv-handle` - this attribute is optional. If needed it can be placed on an element within the sortable element. This element will be the handle for sorting operations.

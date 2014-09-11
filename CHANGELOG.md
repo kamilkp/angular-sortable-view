@@ -1,3 +1,9 @@
+Version 0.0.9 - 2014/09/11
+================
+
+  * fixed a bug where `$digest` hasn't been called after `sv-on-start` handler
+  * added a `sv-on-stop` optional attribute. Function bound there will be called when dragging ended regardless of the fact whether elements have been reordered or not
+
 Version 0.0.8 - 2014/07/15
 ================
 
