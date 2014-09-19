@@ -462,6 +462,8 @@
 						html.removeClass('sv-sorting-in-progress');
 						if(moveExecuted)
 							$controllers[0].$drop($scope.$index, opts);
+						else
+							$element.removeClass('sv-visibility-hidden');
 					});
 
 					// onMousemove(e);
