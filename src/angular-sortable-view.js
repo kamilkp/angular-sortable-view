@@ -1,6 +1,6 @@
 //
 // Copyright Kamil Pękala http://github.com/kamilkp
-// angular-sortable-view v0.0.8 2014/07/15
+// angular-sortable-view v0.0.10 2014/09/19
 //
 
 ;(function(window, angular){
@@ -462,6 +462,8 @@
 						html.removeClass('sv-sorting-in-progress');
 						if(moveExecuted)
 							$controllers[0].$drop($scope.$index, opts);
+						else
+							$element.removeClass('sv-visibility-hidden');
 					});
 
 					// onMousemove(e);
