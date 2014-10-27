@@ -488,7 +488,7 @@
 			require: '?^svElement',
 			link: function($scope, $element, $attrs, $ctrl){
 				if($ctrl)
-					$ctrl.handle = $element;
+					$ctrl.handle = $element.add($ctrl.handle); // support multiple handles
 			}
 		};
 	});
