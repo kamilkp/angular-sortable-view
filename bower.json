@@ -6,7 +6,7 @@
     "Kamil Pękala <kamilkp@gmail.com>"
   ],
   "description": "Fully declarative (multi)sortable for AngularJS",
-  "main": "angular-sortable-view.js",
+  "main": "./src/angular-sortable-view.js",
   "keywords": [
     "angularjs",
     "sortable",
