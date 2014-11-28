@@ -1,6 +1,6 @@
 //
 // Copyright Kamil Pękala http://github.com/kamilkp
-// angular-sortable-view v0.0.10 2014/09/19
+// angular-sortable-view v0.0.11 2014/11/28
 //
 
 ;(function(window, angular){
@@ -37,7 +37,6 @@
 				var $helper; // helper element - the one thats being dragged around with the mouse pointer
 				var $original; // original element
 				var $target; // last best candidate
-				var svOriginalNextSibling; // original element's original next sibling node
 				var isGrid = false;
 				var onSort = $parse($attrs.svOnSort);
 
@@ -120,11 +119,8 @@
 							});
 						}
 
-						svOriginalNextSibling = svOriginal[0].nextSibling;
 						svOriginal.after($placeholder);
-
-					    svOriginal[0].parentNode.removeChild(svOriginal[0]);
-						svOriginal.removeClass('sv-visibility-hidden');
+						svOriginal.addClass('ng-hide');
 
 						// cache options, helper and original element reference
 						$original = svOriginal;
@@ -137,8 +133,7 @@
 							$index: originatingIndex,
 							$item: originatingPart.model(originatingPart.scope)[originatingIndex]
 						});
-						if($scope.$root)
-							$scope.$root.$$phase || $scope.$apply();
+						$scope.$root && $scope.$root.$$phase || $scope.$apply();
 					}
 
 					// ----- move the element
@@ -244,7 +239,7 @@
 						sortingInProgress = false;
 						$placeholder.remove();
 						$helper.remove();
-						svOriginalNextSibling.parentNode.insertBefore($original[0], svOriginalNextSibling);
+						$original.removeClass('ng-hide');
 
 						candidates = void 0;
 						$placeholder = void 0;
@@ -364,12 +359,12 @@
 				});
 
 				var handle = $element;
-				handle.on('mousedown', onMousedown);
+				handle.on('mousedown touchstart', onMousedown);
 				$scope.$watch('$ctrl.handle', function(customHandle){
 					if(customHandle){
-						handle.off('mousedown', onMousedown);
+						handle.off('mousedown touchstart', onMousedown);
 						handle = customHandle;
-						handle.on('mousedown', onMousedown);
+						handle.on('mousedown touchstart', onMousedown);
 					}
 				});
 
@@ -393,8 +388,10 @@
 				var moveExecuted;
 
 				function onMousedown(e){
+					touchFix(e);
+
 					if($controllers[1].sortingInProgress()) return;
-					if(e.button != 0) return;
+					if(e.button != 0 && e.type === 'mousedown') return;
 
 					moveExecuted = false;
 					var opts = $parse($attrs.svElement)($scope);
@@ -435,6 +432,7 @@
 						var targetLeft = coords.x;
 						var targetTop = coords.y;
 						var helperRect = clone[0].getBoundingClientRect();
+
 						var body = document.body;
 
 						if(containmentRect){
@@ -456,9 +454,9 @@
 						y: (e.clientY - clientRect.top)/clientRect.height
 					};
 					html.addClass('sv-sorting-in-progress');
-					html.on('mousemove', onMousemove).on('mouseup', function mouseup(e){
-						html.off('mousemove', onMousemove);
-						html.off('mouseup', mouseup);
+					html.on('mousemove touchmove', onMousemove).on('mouseup touchend touchcancel', function mouseup(e){
+						html.off('mousemove touchmove', onMousemove);
+						html.off('mouseup touchend', mouseup);
 						html.removeClass('sv-sorting-in-progress');
 						if(moveExecuted)
 							$controllers[0].$drop($scope.$index, opts);
@@ -468,6 +466,7 @@
 
 					// onMousemove(e);
 					function onMousemove(e){
+						touchFix(e);
 						if(!moveExecuted){
 							$element.parent().prepend(clone);
 							moveExecuted = true;
@@ -543,6 +542,14 @@
 		'}' +
 		'</style>'
 	].join(''));
+
+	function touchFix(e){
+		if(!('clientX' in e) && !('clientY' in e)){
+			e.clientX = e.touches[0].clientX;
+			e.clientY = e.touches[0].clientY;
+			e.preventDefault();
+		}
+	}
 
 	function getPreviousSibling(element){
 		element = element[0];
