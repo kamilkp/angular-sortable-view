@@ -544,9 +544,12 @@
 	].join(''));
 
 	function touchFix(e){
-		if(!('clientX' in e) && !('clientY' in e)){
-			e.clientX = e.touches[0].clientX;
-			e.clientY = e.touches[0].clientY;
+		if(!('clientX' in e) && !('clientY' in e)) {
+			var touches = e.touches || e.originalEvent.touches;
+			if(touches && touches.length) {
+				e.clientX = touches[0].clientX;
+				e.clientY = touches[0].clientY;
+			}
 			e.preventDefault();
 		}
 	}
