@@ -9,6 +9,10 @@ module.exports = function(grunt){
 				files: {
 					'src/angular-sortable-view.min.js': ['src/angular-sortable-view.js']
 				}
+			},
+			options: {
+				banner: '/*\n\tCopyright Kamil Pękala http://github.com/kamilkp\n' +
+						'\tangular-sortable-view v0.0.13 2015/01/13\n*/\n'
 			}
 		},
 		jshint: {
