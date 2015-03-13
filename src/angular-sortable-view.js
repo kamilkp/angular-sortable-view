@@ -442,7 +442,6 @@
 							'left': clientRect.left + document.body.scrollLeft + 'px',
 							'top': clientRect.top + document.body.scrollTop + 'px'
 						});
-						target.addClass('sv-visibility-hidden');
 					}
 					else{
 						clone = target.clone();
@@ -485,8 +484,6 @@
 						html.removeClass('sv-sorting-in-progress');
 						if(moveExecuted)
 							$controllers[0].$drop($scope.$index, opts);
-						else
-							$element.removeClass('sv-visibility-hidden');
 					});
 
 					// onMousemove(e);
