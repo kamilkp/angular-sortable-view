@@ -10,10 +10,15 @@
 			<input type="checkbox" ng-model="containmentFlag" ng-change="containmentChange(containmentFlag)"/>
 			Contain sorting to yellow container
 		</label>
+		<br>
+		<label style="margin-bottom: 10px;">
+			<input type="checkbox" ng-model="showHandlesFlag" ng-init="showHandlesFlag=true;"/>
+			Show handles
+		</label>
 		<div class="sortable-container grid" sv-root sv-part="data.items4">
 			<div ng-repeat="item in data.items4" sv-element="opts" class="well grid">
 				{{item}}
-				<span sv-handle>handle</span>
+				<span sv-handle ng-show="showHandlesFlag">handle</span>
 			</div>
 		</div>
 	</div>

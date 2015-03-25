@@ -1,12 +1,13 @@
 //
 // Copyright Kamil Pękala http://github.com/kamilkp
-// angular-sortable-view v0.0.11 2014/11/28
+// angular-sortable-view v0.0.13 2015/01/13
 //
 
 ;(function(window, angular){
 	'use strict';
 	/* jshint eqnull:true */
 	/* jshint -W041 */
+	/* jshint -W030 */
 
 	var module = angular.module('angular-sortable-view', []);
 	module.directive('svRoot', [function(){
@@ -30,26 +31,26 @@
 				var mapKey = $interpolate($attrs.svRoot)($scope) || $scope.$id;
 				if(!ROOTS_MAP[mapKey]) ROOTS_MAP[mapKey] = [];
 
-				var that = this;
-				var candidates; // set of possible destinations
-				var $placeholder; // placeholder element
-				var options; // sortable options
-				var $helper; // helper element - the one thats being dragged around with the mouse pointer
-				var $original; // original element
-				var $target; // last best candidate
-				var isGrid = false;
-				var onSort = $parse($attrs.svOnSort);
+				var that         = this;
+				var candidates;  // set of possible destinations
+				var $placeholder;// placeholder element
+				var options;     // sortable options
+				var $helper;     // helper element - the one thats being dragged around with the mouse pointer
+				var $original;   // original element
+				var $target;     // last best candidate
+				var isGrid       = false;
+				var onSort       = $parse($attrs.svOnSort);
 
 				// ----- hack due to https://github.com/angular/angular.js/issues/8044
 				$attrs.svOnStart = $attrs.$$element[0].attributes['sv-on-start'];
-				$attrs.svOnStart = $attrs.svOnStart && $attrs.svOnStart.value; 
+				$attrs.svOnStart = $attrs.svOnStart && $attrs.svOnStart.value;
 
 				$attrs.svOnStop = $attrs.$$element[0].attributes['sv-on-stop'];
-				$attrs.svOnStop = $attrs.svOnStop && $attrs.svOnStop.value; 
+				$attrs.svOnStop = $attrs.svOnStop && $attrs.svOnStop.value;
 				// -------------------------------------------------------------------
 
 				var onStart = $parse($attrs.svOnStart);
-				var onStop = $parse($attrs.svOnStop);				
+				var onStop = $parse($attrs.svOnStop);
 
 				this.sortingInProgress = function(){
 					return sortingInProgress;
@@ -246,7 +247,7 @@
 						options = void 0;
 						$helper = void 0;
 						$original = void 0;
-						
+
 						// sv-on-stop callback
 						onStop($scope, {
 							$part: originatingPart.model(originatingPart.scope),
@@ -277,8 +278,7 @@
 						}
 						$target = void 0;
 
-						if($scope.$root)
-							$scope.$root.$$phase || $scope.$apply();
+						$scope.$root && $scope.$root.$$phase || $scope.$apply();
 					}
 				};
 
@@ -384,7 +384,7 @@
 
 				var body = angular.element(document.body);
 				var html = angular.element(document.documentElement);
-				
+
 				var moveExecuted;
 
 				function onMousedown(e){
@@ -544,9 +544,12 @@
 	].join(''));
 
 	function touchFix(e){
-		if(!('clientX' in e) && !('clientY' in e)){
-			e.clientX = e.touches[0].clientX;
-			e.clientY = e.touches[0].clientY;
+		if(!('clientX' in e) && !('clientY' in e)) {
+			var touches = e.touches || e.originalEvent.touches;
+			if(touches && touches.length) {
+				e.clientX = touches[0].clientX;
+				e.clientY = touches[0].clientY;
+			}
 			e.preventDefault();
 		}
 	}
@@ -601,5 +604,22 @@
 		else
 			return angular.element();
 	};
+
+	/*
+		Simple implementation of jQuery's .add method
+	 */
+	if(typeof angular.element.prototype.add !== 'function'){
+		angular.element.prototype.add = function(elem){
+			var i, res = angular.element();
+			elem = angular.element(elem);
+			for(i=0;i<this.length;i++){
+				res.push(this[i]);
+			}
+			for(i=0;i<elem.length;i++){
+				res.push(elem[i]);
+			}
+			return res;
+		};
+	}
 
 })(window, window.angular);
