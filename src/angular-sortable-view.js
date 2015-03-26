@@ -1,6 +1,6 @@
 //
 // Copyright Kamil Pękala http://github.com/kamilkp
-// angular-sortable-view v0.0.13 2015/01/13
+// angular-sortable-view v0.0.14 2015/01/13
 //
 
 ;
