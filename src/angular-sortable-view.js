@@ -399,8 +399,14 @@
 						tolerance: 'pointer',
 						revert: 200,
 						containment: 'html',
-						axis: null
+						axis: null,
+						enable: true
 					}, opts);
+
+					if (!opts.enable) {
+						return;
+					}
+
 					if(opts.containment){
 						var containmentRect = closestElement.call($element, opts.containment)[0].getBoundingClientRect();
 					}
