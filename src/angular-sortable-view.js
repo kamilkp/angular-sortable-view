@@ -139,8 +139,8 @@
 
 					// ----- move the element
 					$helper[0].reposition({
-						x: mouse.x + document.body.scrollLeft - mouse.offset.x*svRect.width,
-						y: mouse.y + document.body.scrollTop - mouse.offset.y*svRect.height
+						x: !opts.axis || opts.axis == 'x' ? mouse.x + document.body.scrollLeft - mouse.offset.x*svRect.width : undefined,
+						y: !opts.axis || opts.axis == 'y' ? mouse.y + document.body.scrollTop - mouse.offset.y*svRect.height : undefined
 					});
 
 					// ----- manage candidates
@@ -398,7 +398,8 @@
 					opts = angular.extend({}, {
 						tolerance: 'pointer',
 						revert: 200,
-						containment: 'html'
+						containment: 'html',
+						axis: null
 					}, opts);
 					if(opts.containment){
 						var containmentRect = closestElement.call($element, opts.containment)[0].getBoundingClientRect();
@@ -413,19 +414,16 @@
 					if(helper){
 						clone = helper.clone();
 						clone.removeClass('ng-hide');
-						clone.css({
-							'left': clientRect.left + document.body.scrollLeft + 'px',
-							'top': clientRect.top + document.body.scrollTop + 'px'
-						});
+						if (!opts.axis || opts.axis == 'x') close.css('left', clientRect.left + document.body.scrollLeft + 'px');
+						if (!opts.axis || opts.axis == 'y') close.css('top', clientRect.top + document.body.scrollTop + 'px');
 						target.addClass('sv-visibility-hidden');
 					}
 					else{
 						clone = target.clone();
-						clone.addClass('sv-helper').css({
-							'left': clientRect.left + document.body.scrollLeft + 'px',
-							'top': clientRect.top + document.body.scrollTop + 'px',
-							'width': clientRect.width + 'px'
-						});
+						clone.addClass('sv-helper');
+						if (!opts.axis || opts.axis == 'x') clone.css('left', clientRect.left + document.body.scrollLeft + 'px');
+						if (!opts.axis || opts.axis == 'y') clone.css('top', clientRect.top + document.body.scrollTop + 'px');
+						clone.css('width', clientRect.width + 'px');
 					}
 
 					clone[0].reposition = function(coords){
