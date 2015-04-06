@@ -413,9 +413,9 @@
 				var moveExecuted;
 
 				function onMousedown(e) {
-					touchFix(e);
-
 					if ($controllers[0].isDisabled) return;
+
+					touchFix(e);
 
 					if ($controllers[1].sortingInProgress()) return;
 
