@@ -157,3 +157,14 @@ The API is declarative. There are four directives (hooked on attributes) that ne
 	</div>
 </div>
 ```
+
+###Example of sorting with images
+_Because images are draggable by default the browser will trigger the default behavior of showing an image's ghost on a drag event rather than the mousedown event listener relied on by this module, disabling that drag behavior leaves the element free to move immediately._ 
+
+```html
+<div sv-root sv-part="photosArray">
+	<div ng-repeat="photo in photosArray" sv-element>
+		<img draggable="false" ng-src="{{photo.url}}" />
+	</div>
+</div>
+```
