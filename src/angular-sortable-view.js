@@ -129,7 +129,7 @@
 						$helper = svElement;
 
 						onStart($scope, {
-							$helper: $helper,
+							$helper: {element: $helper},
 							$part: originatingPart.model(originatingPart.scope),
 							$index: originatingIndex,
 							$item: originatingPart.model(originatingPart.scope)[originatingIndex]
