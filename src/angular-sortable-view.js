@@ -121,7 +121,11 @@
 						}
 
 						svOriginal.after($placeholder);
-						svOriginal.addClass('ng-hide');
+						if(opts.showOriginal) {
+							svOriginal.addClass('sv-original');
+						} else {
+							svOriginal.addClass('ng-hide');
+						}
 
 						// cache options, helper and original element reference
 						$original = svOriginal;
@@ -240,7 +244,14 @@
 						sortingInProgress = false;
 						$placeholder.remove();
 						$helper.remove();
-						$original.removeClass('ng-hide');
+
+						var showOriginal = false;
+						if(options.showOriginal) {
+							showOriginal = true;
+							$original.removeClass('sv-original');
+						} else {
+							$original.removeClass('ng-hide');
+						}
 
 						candidates = void 0;
 						$placeholder = void 0;
@@ -259,10 +270,24 @@
 							$target.element.removeClass('sv-candidate');
 							var spliced = originatingPart.model(originatingPart.scope).splice(index, 1);
 							var targetIndex = $target.targetIndex;
-							if($target.view === originatingPart && $target.targetIndex > index)
-								targetIndex--;
-							if($target.after)
-								targetIndex++;
+							// Handles before/after originatingPart drop cases;
+							if(showOriginal) {
+								// Fixes 'after itself' case resolving to index of index+1
+								if($target.targetIndex === index+1 && ($target.after === false)) {
+									targetIndex--;
+								}
+								// Fixes 'before itself' case resolving to index of index-1
+								if($target.targetIndex === index-1 && ($target.after === true)) {
+									targetIndex++;
+								}
+							} else {
+								if($target.view === originatingPart && $target.targetIndex > index) {
+									targetIndex--;
+								}
+								if($target.after) {
+									targetIndex++;
+								}
+							}
 							$target.view.model($target.view.scope).splice(targetIndex, 0, spliced[0]);
 
 							// sv-on-sort callback
@@ -417,7 +442,6 @@
 							'left': clientRect.left + document.body.scrollLeft + 'px',
 							'top': clientRect.top + document.body.scrollTop + 'px'
 						});
-						target.addClass('sv-visibility-hidden');
 					}
 					else{
 						clone = target.clone();
@@ -460,8 +484,6 @@
 						html.removeClass('sv-sorting-in-progress');
 						if(moveExecuted)
 							$controllers[0].$drop($scope.$index, opts);
-						else
-							$element.removeClass('sv-visibility-hidden');
 					});
 
 					// onMousemove(e);
