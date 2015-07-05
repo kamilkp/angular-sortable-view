@@ -257,13 +257,44 @@
 
 						if($target){
 							$target.element.removeClass('sv-candidate');
-							var spliced = originatingPart.model(originatingPart.scope).splice(index, 1);
+
+							var srcIndex = index;
 							var targetIndex = $target.targetIndex;
-							if($target.view === originatingPart && $target.targetIndex > index)
-								targetIndex--;
-							if($target.after)
-								targetIndex++;
-							$target.view.model($target.view.scope).splice(targetIndex, 0, spliced[0]);
+							var direction = ( targetIndex >= index ? 1 : -1 );
+							var origArray = originatingPart.model( originatingPart.scope );
+							var visibleArray = getSortableElements( mapKey );
+
+							var spliced = [ origArray[ srcIndex ] ];
+
+							var copy = origArray[ srcIndex ];
+							if ( direction > 0 ) {
+								var prevOrigIndex = null;
+								visibleArray.forEach( function( e, i ) {
+									var currOrigIndex = e.getIndex ? e.getIndex() : -1;
+									if ( currOrigIndex > srcIndex && currOrigIndex <= targetIndex ) {
+										origArray[ prevOrigIndex ] = origArray[ currOrigIndex ];
+									}
+									prevOrigIndex = currOrigIndex;
+								} );
+							}
+							else {
+								var prevCopy = null;
+								visibleArray.forEach( function( e, i ) {
+									var currOrigIndex = e.getIndex ? e.getIndex() : -1;
+									var currCopy = origArray[ currOrigIndex ];
+									if ( currOrigIndex > targetIndex && currOrigIndex <= srcIndex ) {
+										origArray[ currOrigIndex ] = prevCopy;
+									}
+									prevCopy = currCopy;
+								} );
+							}
+							origArray[ targetIndex ] = copy;
+
+
+
+
+
+
 
 							// sv-on-sort callback
 							if($target.view !== originatingPart || index !== targetIndex)
