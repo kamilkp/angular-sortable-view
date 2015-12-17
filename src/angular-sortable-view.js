@@ -39,7 +39,14 @@
 				var $original;   // original element
 				var $target;     // last best candidate
 				var isGrid       = false;
+				var isDisabled   = false;
 				var onSort       = $parse($attrs.svOnSort);
+
+
+				// not sure if this is efficient?
+				$scope.$watch($parse($attrs.svDisabled), function(newVal, oldVal) {
+					isDisabled = newVal;
+				});
 
 				// ----- hack due to https://github.com/angular/angular.js/issues/8044
 				$attrs.svOnStart = $attrs.$$element[0].attributes['sv-on-start'];
@@ -56,6 +63,9 @@
 					return sortingInProgress;
 				};
 
+				this.sortingDisabled = function() {
+					return isDisabled;
+				};
 				if($attrs.svGrid){ // sv-grid determined explicite
 					isGrid = $attrs.svGrid === "true" ? true : $attrs.svGrid === "false" ? false : null;
 					if(isGrid === null)
@@ -391,6 +401,10 @@
 					touchFix(e);
 
 					if($controllers[1].sortingInProgress()) return;
+
+					// do nothing if sorting is disabled
+					if ($controllers[1].sortingDisabled()) return;
+
 					if(e.button != 0 && e.type === 'mousedown') return;
 
 					moveExecuted = false;
