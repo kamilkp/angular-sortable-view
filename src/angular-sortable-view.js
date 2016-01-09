@@ -237,6 +237,16 @@
 						afterRevert();
 
 					function afterRevert(){
+						function generateKey(){
+						    var length = 32,
+						        charset = "abcdefghijklnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-",
+						        retVal = "";
+						    for (var i = 0, n = charset.length; i < length; ++i) {
+						        retVal += charset.charAt(Math.floor(Math.random() * n));
+						    }
+						    return retVal;
+						}
+
 						sortingInProgress = false;
 						$placeholder.remove();
 						$helper.remove();
@@ -260,8 +270,10 @@
 							var spliced;
 							if(!originatingPart.scope.clone) 
 								spliced = originatingPart.model(originatingPart.scope).splice(index, 1);
-							else 
+							else { 
 								spliced = [originatingPart.model(originatingPart.scope)[index]];
+								spliced[0].$uniq_key = generateKey();
+							}
 							var targetIndex = $target.targetIndex;
 							if($target.view === originatingPart && $target.targetIndex > index)
 								targetIndex--;
