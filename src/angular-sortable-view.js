@@ -246,6 +246,15 @@
 						    }
 						    return retVal;
 						}
+						function clone(obj) {
+						    if (null == obj || "object" != typeof obj) return obj;
+						    var copy = obj.constructor();
+						    for (var attr in obj) {
+						        if (obj.hasOwnProperty(attr)) copy[attr] = obj[attr];
+						    }
+						    return copy;
+						}
+
 
 						sortingInProgress = false;
 						$placeholder.remove();
@@ -271,7 +280,7 @@
 							if(!originatingPart.scope.clone) 
 								spliced = originatingPart.model(originatingPart.scope).splice(index, 1);
 							else { 
-								spliced = [originatingPart.model(originatingPart.scope)[index]];
+								spliced = [clone(originatingPart.model(originatingPart.scope)[index])];
 								spliced[0].$uniq_key = generateKey();
 							}
 							var targetIndex = $target.targetIndex;
