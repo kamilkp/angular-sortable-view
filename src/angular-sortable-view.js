@@ -257,13 +257,17 @@
 
 						if($target){
 							$target.element.removeClass('sv-candidate');
-							var spliced = originatingPart.model(originatingPart.scope).splice(index, 1);
+							var spliced;
+							if(!originatingPart.scope.clone) 
+								spliced = originatingPart.model(originatingPart.scope).splice(index, 1);
+							else 
+								spliced = [originatingPart.model(originatingPart.scope)[index]];
 							var targetIndex = $target.targetIndex;
 							if($target.view === originatingPart && $target.targetIndex > index)
 								targetIndex--;
 							if($target.after)
 								targetIndex++;
-							$target.view.model($target.view.scope).splice(targetIndex, 0, spliced[0]);
+							if(!$target.view.scope.clone)$target.view.model($target.view.scope).splice(targetIndex, 0, spliced[0]);
 
 							// sv-on-sort callback
 							if($target.view !== originatingPart || index !== targetIndex)
@@ -302,7 +306,7 @@
 		return {
 			restrict: 'A',
 			require: '^svRoot',
-			controller: ['$scope', function($scope){
+			controller: ['$scope','$attrs', function($scope,$attrs){
 				$scope.$ctrl = this;
 				this.getPart = function(){
 					return $scope.part;
@@ -310,6 +314,7 @@
 				this.$drop = function(index, options){
 					$scope.$sortableRoot.$drop($scope.part, index, options);
 				};
+				if($attrs.svPartClone) $scope.clone = true;
 			}],
 			scope: true,
 			link: function($scope, $element, $attrs, $sortable){
