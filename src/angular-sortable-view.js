@@ -458,10 +458,10 @@
 						html.off('mousemove touchmove', onMousemove);
 						html.off('mouseup touchend', mouseup);
 						html.removeClass('sv-sorting-in-progress');
-						if(moveExecuted)
+						if(moveExecuted){
 							$controllers[0].$drop($scope.$index, opts);
-						else
-							$element.removeClass('sv-visibility-hidden');
+						}
+						$element.removeClass('sv-visibility-hidden');
 					});
 
 					// onMousemove(e);
