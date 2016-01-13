@@ -18,7 +18,7 @@
 					<li><span class="syntax">$partFrom</span> is the part from which the $item originated</li>
 					<li><span class="syntax">$partTo</span> is the part to which the $item has been moved</li>
 					<li><span class="syntax">$indexFrom</span> is the previous index of the $item in $partFrom</li>
-					<li><span class="syntax">$indedTo</span> is the index of the $item in $partTo</li>
+					<li><span class="syntax">$indexTo</span> is the index of the $item in $partTo</li>
 				</ul>
 			</li>
 			<li><span class="syntax">sv-on-start</span> - The expression passed as a value of that attribute will be evaluated when a user starts moving an element. Several parameters can be injected there like: <span class="syntax">sv-on-start="bar($item, $part, $index, $helper)"</span> where:
@@ -26,7 +26,7 @@
 					<li><span class="syntax">$item</span> is the item in model which started being moved</li>
 					<li><span class="syntax">$part</span> is the part from which the $item originates</li>
 					<li><span class="syntax">$index</span> is the index of the $item in $part</li>
-					<li><span class="syntax">$helper</span> is the jqLite/jQuery object of an element that is being dragged around</li>
+					<li><span class="syntax">$helper</span> is an object which contains the jqLite/jQuery object (as property element) of what is being dragged around</li>
 				</ul>
 			</li>
 		</ul>
