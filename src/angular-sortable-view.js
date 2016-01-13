@@ -401,7 +401,12 @@
 						containment: 'html'
 					}, opts);
 					if(opts.containment){
-						var containmentRect = closestElement.call($element, opts.containment)[0].getBoundingClientRect();
+						if(opts.containment instanceof Array){
+							var containmentRect = closestElement.call($element, opts.containment)[0].getBoundingClientRect();
+						}
+						else{
+							var containmentRect = closestElement.call($element, opts.containment).getBoundingClientRect();
+						}
 					}
 
 					var target = $element;
