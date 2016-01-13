@@ -38,7 +38,7 @@ The API is declarative. There are four directives (hooked on attributes) that ne
 					<li>`$helper` is the jqLite/jQuery object of an element that is being dragged around</li>
 				</ul>
 			</li>
-			<li>`sv-on-stop` - The expression passed as a value of that attribute will be evaluated when a user stops moving an element (drops it). This will be called regardless of the fact whether elements have been reordered or now. Several parameters can be injected there like: `sv-on-end="baz($item, $part, $index)"` where:
+			<li>`sv-on-stop` - The expression passed as a value of that attribute will be evaluated when a user stops moving an element (drops it). This will be called regardless of the fact whether elements have been reordered or now. Several parameters can be injected there like: `sv-on-stop="baz($item, $part, $index)"` where:
 				<ul>
 					<li>`$item` is the item in model which started being moved</li>
 					<li>`$part` is the part from which the $item originates</li>
