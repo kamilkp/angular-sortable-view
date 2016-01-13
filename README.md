@@ -1,4 +1,4 @@
-angular-sortable-view v0.0.13 [![Bower version](https://badge.fury.io/bo/angular-sortable-view.svg)](http://badge.fury.io/bo/angular-sortable-view)
+angular-sortable-view v0.0.14 [![Bower version](https://badge.fury.io/bo/angular-sortable-view.svg)](http://badge.fury.io/bo/angular-sortable-view)
 =================
 
 Fully declarative (multi)sortable for AngularJS
@@ -159,7 +159,7 @@ The API is declarative. There are four directives (hooked on attributes) that ne
 ```
 
 ###Example of sorting with images
-_Because images are draggable by default the browser will trigger the default behavior of showing an image's ghost on a drag event rather than the mousedown event listener relied on by this module, disabling that drag behavior leaves the element free to move immediately._ 
+_Because images are draggable by default the browser will trigger the default behavior of showing an image's ghost on a drag event rather than the mousedown event listener relied on by this module, disabling that drag behavior leaves the element free to move immediately._
 
 ```html
 <div sv-root sv-part="photosArray">

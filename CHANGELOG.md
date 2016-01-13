@@ -1,3 +1,8 @@
+Version 0.0.14 - 2016/01/13
+================
+
+  * merged some of the pull requests
+
 Version 0.0.13 - 2015/01/13
 ================
 
