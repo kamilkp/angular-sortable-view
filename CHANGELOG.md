@@ -1,3 +1,8 @@
+Version 0.0.15 - 2016/01/18
+================
+
+  * reveted a PR that introduced a bug https://github.com/kamilkp/angular-sortable-view/issues/79
+
 Version 0.0.14 - 2016/01/13
 ================
 
