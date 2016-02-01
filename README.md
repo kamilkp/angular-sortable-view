@@ -43,6 +43,7 @@ The API is declarative. There are four directives (hooked on attributes) that ne
 					<li>`$item` is the item in model which started being moved</li>
 					<li>`$part` is the part from which the $item originates</li>
 					<li>`$index` is the index of the $item in $part</li>
+					<li>`$moved` is true if the item has moved</li>
 				</ul>
 			</li>
   * `sv-part` - this attribute should be placed on an element that is a container for the `ngRepeat`'ed elements. Its value should be the same as the right hand side expression in `ng-repeat` attribute.
