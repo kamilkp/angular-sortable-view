@@ -272,7 +272,8 @@
 									$partFrom: originatingPart.model(originatingPart.scope),
 									$item: spliced[0],
 									$indexTo: targetIndex,
-									$indexFrom: index
+									$indexFrom: index,
+									$partToScope: $target.view.scope
 								});
 
 						}
