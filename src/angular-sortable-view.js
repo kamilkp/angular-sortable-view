@@ -432,6 +432,7 @@
 						var targetLeft = coords.x;
 						var targetTop = coords.y;
 						var helperRect = clone[0].getBoundingClientRect();
+						var myParent = getParentPositioned($element[0]);
 
 						var body = document.body;
 
@@ -445,6 +446,13 @@
 							if(targetLeft + helperRect.width > containmentRect.left + body.scrollLeft + containmentRect.width) // right boundary
 								targetLeft = containmentRect.left + body.scrollLeft + containmentRect.width - helperRect.width;
 						}
+
+						//add parent position offset, if element is within a positioned element
+						if(myParent){
+							targetTop = targetTop - myParent.top;
+							targetLeft = targetLeft - myParent.left;
+						}
+
 						this.style.left = targetLeft - body.scrollLeft + 'px';
 						this.style.top = targetTop - body.scrollTop + 'px';
 					};
@@ -593,6 +601,24 @@
 		if(matchingFunction !== null)
 			return element[matchingFunction](selector);
 	}
+
+	//get closest parent node that is positioned
+	function getParentPositioned(el){
+		el = el.parentNode;
+
+		while(el !== document.documentElement){
+			var pos = angular.element(el).css("position");
+			if(pos != 'static' && pos != ''){
+				console.log(el);
+				console.log(el.getBoundingClientRect());
+				return el.getBoundingClientRect();
+			} else{
+				el = el.parentNode;
+			}
+		}
+		return null;
+	}
+
 
 	var closestElement = angular.element.prototype.closest || function (selector){
 		var el = this[0].parentNode;
