@@ -456,6 +456,7 @@
 						target.addClass('sv-visibility-hidden');
 					}
 					else{
+						target.addClass('sv-long-pressing');
 						clone = target.clone();
 						clone.addClass('sv-helper').css({
 							'left': clientRect.left + document.body.scrollLeft + 'px',
@@ -498,6 +499,7 @@
 							$controllers[0].$drop($scope.$index, opts);
 						}
 						$element.removeClass('sv-visibility-hidden');
+						target.removeClass('sv-long-pressing');
 					});
 
 					// onMousemove(e);
