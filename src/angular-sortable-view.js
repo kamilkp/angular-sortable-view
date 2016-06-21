@@ -378,7 +378,6 @@
 					} else {
 						resetOnStartEvent($element);
 					}
-
  				})
 
 				var handle = $element;
@@ -546,7 +545,21 @@
 			require: ['?^svPart', '?^svElement'],
 			link: function($scope, $element, $attrs, $ctrl){
 				$element.addClass('sv-placeholder').addClass('ng-hide');
-				if($ctrl[1])
+
+				if ($ctrl[1] && $ctrl[0]){
+					//find closest svPart or svElement and set placeholder in the correct place
+					var p = $element.parent();
+					while (p.length > 0) {
+					  if (p[0].hasAttribute('sv-element')){
+					  	$ctrl[1].placeholder = $element;
+					  	return;
+					  } else if (p[0].hasAttribute('sv-part')){
+					  	$ctrl[0].placeholder = $element;
+					  	return;
+					  }
+					  p = p.parent();
+					}
+				} else if($ctrl[1])
 					$ctrl[1].placeholder = $element;
 				else if($ctrl[0])
 					$ctrl[0].placeholder = $element;
