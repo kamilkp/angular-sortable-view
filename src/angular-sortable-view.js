@@ -161,6 +161,7 @@
 								!elementMatchesSelector(se.element, opts.containment + ' *')
 							) return; // element is not within allowed containment
 						}
+
 						var rect = se.element[0].getBoundingClientRect();
 						var center = {
 							x: ~~(rect.left + rect.width/2),
@@ -355,6 +356,9 @@
 				$scope.$ctrl = this;
 			}],
 			link: function($scope, $element, $attrs, $controllers){
+
+
+
 				var sortableElement = {
 					element: $element,
 					getPart: $controllers[0].getPart,
@@ -367,13 +371,21 @@
 					$controllers[1].removeFromSortableElements(sortableElement);
 				});
 
+				// assume every element is draggable unless specified
+				$scope.$watch($parse($attrs.svElementDisabled), function(newVal, oldVal) {
+					if (newVal){
+						resetOnStartEvent(false);
+					} else {
+						resetOnStartEvent($element);
+					}
+
+ 				})
+
 				var handle = $element;
 				handle.on('mousedown touchstart', onMousedown);
 				$scope.$watch('$ctrl.handle', function(customHandle){
 					if(customHandle){
-						handle.off('mousedown touchstart', onMousedown);
-						handle = customHandle;
-						handle.on('mousedown touchstart', onMousedown);
+						resetOnStartEvent(customHandle)
 					}
 				});
 
@@ -395,6 +407,20 @@
 				var html = angular.element(document.documentElement);
 
 				var moveExecuted;
+
+
+				function resetOnStartEvent(newHandle){
+					if (newHandle){
+						if (newHandle !== handle){
+							handle.off('mousedown touchstart', onMousedown);
+							handle = newHandle;
+							handle.on('mousedown touchstart', onMousedown);
+							return;
+						}
+					} else {
+						handle.off('mousedown touchstart', onMousedown);
+					}
+				}
 
 				function onMousedown(e){
 					touchFix(e);
