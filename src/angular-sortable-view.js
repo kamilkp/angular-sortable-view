@@ -411,12 +411,10 @@
 
 				function resetOnStartEvent(newHandle){
 					if (newHandle){
-						if (newHandle !== handle){
 							handle.off('mousedown touchstart', onMousedown);
 							handle = newHandle;
 							handle.on('mousedown touchstart', onMousedown);
 							return;
-						}
 					} else {
 						handle.off('mousedown touchstart', onMousedown);
 					}
