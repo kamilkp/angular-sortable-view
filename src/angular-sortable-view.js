@@ -39,7 +39,12 @@
 				var $original;   // original element
 				var $target;     // last best candidate
 				var isGrid       = false;
+				var isDisabled   = false;
 				var onSort       = $parse($attrs.svOnSort);
+
+				$scope.$watch($parse($attrs.svDisabled), function(newVal, oldVal) {
+ 					isDisabled = newVal;
+ 				})
 
 				// ----- hack due to https://github.com/angular/angular.js/issues/8044
 				$attrs.svOnStart = $attrs.$$element[0].attributes['sv-on-start'];
@@ -55,6 +60,10 @@
 				this.sortingInProgress = function(){
 					return sortingInProgress;
 				};
+
+				this.sortingDisabled = function() {
+ 					return isDisabled;
+ 				};
 
 				if($attrs.svGrid){ // sv-grid determined explicite
 					isGrid = $attrs.svGrid === "true" ? true : $attrs.svGrid === "false" ? false : null;
@@ -152,6 +161,7 @@
 								!elementMatchesSelector(se.element, opts.containment + ' *')
 							) return; // element is not within allowed containment
 						}
+
 						var rect = se.element[0].getBoundingClientRect();
 						var center = {
 							x: ~~(rect.left + rect.width/2),
@@ -346,6 +356,9 @@
 				$scope.$ctrl = this;
 			}],
 			link: function($scope, $element, $attrs, $controllers){
+
+
+
 				var sortableElement = {
 					element: $element,
 					getPart: $controllers[0].getPart,
@@ -358,13 +371,21 @@
 					$controllers[1].removeFromSortableElements(sortableElement);
 				});
 
+				// assume every element is draggable unless specified
+				$scope.$watch($parse($attrs.svElementDisabled), function(newVal, oldVal) {
+					if (newVal){
+						resetOnStartEvent(false);
+					} else {
+						resetOnStartEvent($element);
+					}
+
+ 				})
+
 				var handle = $element;
 				handle.on('mousedown touchstart', onMousedown);
 				$scope.$watch('$ctrl.handle', function(customHandle){
 					if(customHandle){
-						handle.off('mousedown touchstart', onMousedown);
-						handle = customHandle;
-						handle.on('mousedown touchstart', onMousedown);
+						resetOnStartEvent(customHandle)
 					}
 				});
 
@@ -387,10 +408,23 @@
 
 				var moveExecuted;
 
+
+				function resetOnStartEvent(newHandle){
+					if (newHandle){
+							handle.off('mousedown touchstart', onMousedown);
+							handle = newHandle;
+							handle.on('mousedown touchstart', onMousedown);
+							return;
+					} else {
+						handle.off('mousedown touchstart', onMousedown);
+					}
+				}
+
 				function onMousedown(e){
 					touchFix(e);
 
 					if($controllers[1].sortingInProgress()) return;
+					if($controllers[1].sortingDisabled()) return;
 					if(e.button != 0 && e.type === 'mousedown') return;
 
 					moveExecuted = false;
@@ -420,6 +454,7 @@
 						target.addClass('sv-visibility-hidden');
 					}
 					else{
+						target.addClass('sv-long-pressing');
 						clone = target.clone();
 						clone.addClass('sv-helper').css({
 							'left': clientRect.left + document.body.scrollLeft + 'px',
@@ -462,6 +497,7 @@
 							$controllers[0].$drop($scope.$index, opts);
 						}
 						$element.removeClass('sv-visibility-hidden');
+						target.removeClass('sv-long-pressing');
 					});
 
 					// onMousemove(e);
@@ -510,7 +546,20 @@
 			require: ['?^svPart', '?^svElement'],
 			link: function($scope, $element, $attrs, $ctrl){
 				$element.addClass('sv-placeholder').addClass('ng-hide');
-				if($ctrl[1])
+				if ($ctrl[1] && $ctrl[0]){
+					//find closest svPart or svElement and set placeholder in the correct place
+					var p = $element.parent();
+					while (p.length > 0) {
+					  if (p[0].hasAttribute('sv-element')){
+					  	$ctrl[1].placeholder = $element;
+					  	return;
+					  } else if (p[0].hasAttribute('sv-part')){
+					  	$ctrl[0].placeholder = $element;
+					  	return;
+					  }
+					  p = p.parent();
+					}
+				} else if($ctrl[1])
 					$ctrl[1].placeholder = $element;
 				else if($ctrl[0])
 					$ctrl[0].placeholder = $element;
