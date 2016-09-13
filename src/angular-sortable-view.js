@@ -470,15 +470,19 @@
 					});
 
 					// onMousemove(e);
-					function onMousemove(e){
-						touchFix(e);
+					function onMousemove(moveEv){
+						touchFix(moveEv);
+						var jiggle = Math.abs(moveEv.clientY - e.clientY)
+							         + Math.abs(moveEv.clientX - e.clientX);
+						if (jiggle < 10) return;
 						if(!moveExecuted){
 							$element.parent().prepend(clone);
 							moveExecuted = true;
 						}
+
 						$controllers[1].$moveUpdate(opts, {
-							x: e.clientX,
-							y: e.clientY,
+							x: moveEv.clientX,
+							y: moveEv.clientY,
 							offset: pointerOffset
 						}, clone, $element, placeholder, $controllers[0].getPart(), $scope.$index);
 					}
