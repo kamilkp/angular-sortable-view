@@ -353,12 +353,14 @@
 						return $scope.$index;
 					}
 				};
+				var handle = $element;
+
 				$controllers[1].addToSortableElements(sortableElement);
 				$scope.$on('$destroy', function(){
 					$controllers[1].removeFromSortableElements(sortableElement);
+					handle.off('mousedown touchstart', onMousedown);
 				});
 
-				var handle = $element;
 				handle.on('mousedown touchstart', onMousedown);
 				$scope.$watch('$ctrl.handle', function(customHandle){
 					if(customHandle){
