@@ -394,6 +394,7 @@
 				var html = angular.element(document.documentElement);
 
 				var moveExecuted;
+                var letsChanceToClick;
 
 				function onMousedown(e){
 					touchFix(e);
@@ -403,6 +404,7 @@
 					if(e.button != 0 && e.type === 'mousedown') return;
 
 					moveExecuted = false;
+                    letsChanceToClick = false;
 					var opts = $parse($attrs.svElement)($scope);
 					opts = angular.extend({}, {
 						tolerance: 'pointer',
@@ -475,6 +477,10 @@
 
 					// onMousemove(e);
 					function onMousemove(e){
+                        if (!letsChanceToClick) {
+                            letsChanceToClick = true;
+                            return;
+                        }
 						touchFix(e);
 						if(!moveExecuted){
 							$element.parent().prepend(clone);
