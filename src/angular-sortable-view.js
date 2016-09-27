@@ -51,6 +51,14 @@
 
 				var onStart = $parse($attrs.svOnStart);
 				var onStop = $parse($attrs.svOnStop);
+                var disabled;
+                $scope.$watch($attrs.svDisabled, function() {
+                    disabled = $scope.$eval($attrs.svDisabled) || false;
+                });
+
+                this.isDisabled = function() {
+                    return disabled;
+                };
 
 				this.sortingInProgress = function(){
 					return sortingInProgress;
@@ -390,6 +398,7 @@
 				function onMousedown(e){
 					touchFix(e);
 
+                    if($controllers[1].isDisabled()) return;
 					if($controllers[1].sortingInProgress()) return;
 					if(e.button != 0 && e.type === 'mousedown') return;
 
