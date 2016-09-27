@@ -19,7 +19,7 @@ This library requires ***no dependencies whatsoever*** (except angular.js of cou
 
 The API is declarative. There are four directives (hooked on attributes) that need to be nested properly:
 
-  * `sv-root` - this is where all the logic is happening. If multiple lists should be connected with each other so that elements can be moved between them and they have a common ancestor, put this attribute on that element. If not and you still want the multi-sortable behaviour a value for that attribue must be provided. That value will be used as an identifier to connect those roots together.
+  * `sv-root` - this is where all the logic is happening. If multiple lists should be connected with each other so that elements can be moved between them and they have a common ancestor, put this attribute on that element. If not and you still want the multi-sortable behaviour a value for that attribue must be provided. That value will be used as an identifier to connect those roots together. Optionnally you can add `sv-disabled=boolean` to deactive dragging.
     **Optional attributes:**
     * `sv-on-sort` - The expression passed as a value of that attribute will be evaluated when elements order has changed after sorting. Several parameters can be injected there like: `sv-on-sort="foo($item, $partFrom, $partTo, $indexFrom, $indexTo)"` where:
 				<ul>
