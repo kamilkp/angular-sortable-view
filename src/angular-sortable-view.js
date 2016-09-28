@@ -361,6 +361,12 @@
 						return $scope.$index;
 					}
 				};
+
+                var elemDisabled;
+                $scope.$watch($attrs.svDisabled, function() {
+                    elemDisabled = $scope.$eval($attrs.svDisabled) || false;
+                });
+
 				$controllers[1].addToSortableElements(sortableElement);
 				$scope.$on('$destroy', function(){
 					$controllers[1].removeFromSortableElements(sortableElement);
@@ -399,7 +405,7 @@
 				function onMousedown(e){
 					touchFix(e);
 
-                    if($controllers[1].isDisabled()) return;
+                    if($controllers[1].isDisabled() || elemDisabled) return;
 					if($controllers[1].sortingInProgress()) return;
 					if(e.button != 0 && e.type === 'mousedown') return;
 
