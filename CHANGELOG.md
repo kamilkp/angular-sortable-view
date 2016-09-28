@@ -1,3 +1,8 @@
+Version 0.0.17 - 2016/10/28
+================
+
+  * add disabled capability onto unique element
+
 Version 0.0.16 - 2016/10/27
 ================
 
