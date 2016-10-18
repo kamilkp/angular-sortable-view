@@ -51,6 +51,14 @@
 
 				var onStart = $parse($attrs.svOnStart);
 				var onStop = $parse($attrs.svOnStop);
+                var disabled;
+                $scope.$watch($attrs.svDisabled, function() {
+                    disabled = $scope.$eval($attrs.svDisabled) || false;
+                });
+
+                this.isDisabled = function() {
+                    return disabled;
+                };
 
 				this.sortingInProgress = function(){
 					return sortingInProgress;
@@ -353,6 +361,12 @@
 						return $scope.$index;
 					}
 				};
+
+                var elemDisabled;
+                $scope.$watch($attrs.svDisabled, function() {
+                    elemDisabled = $scope.$eval($attrs.svDisabled) || false;
+                });
+
 				$controllers[1].addToSortableElements(sortableElement);
 				$scope.$on('$destroy', function(){
 					$controllers[1].removeFromSortableElements(sortableElement);
@@ -386,14 +400,17 @@
 				var html = angular.element(document.documentElement);
 
 				var moveExecuted;
+                var letsChanceToClick;
 
 				function onMousedown(e){
 					touchFix(e);
 
+                    if($controllers[1].isDisabled() || elemDisabled) return;
 					if($controllers[1].sortingInProgress()) return;
 					if(e.button != 0 && e.type === 'mousedown') return;
 
 					moveExecuted = false;
+                    letsChanceToClick = false;
 					var opts = $parse($attrs.svElement)($scope);
 					opts = angular.extend({}, {
 						tolerance: 'pointer',
@@ -466,6 +483,10 @@
 
 					// onMousemove(e);
 					function onMousemove(e){
+                        if (!letsChanceToClick) {
+                            letsChanceToClick = true;
+                            return;
+                        }
 						touchFix(e);
 						if(!moveExecuted){
 							$element.parent().prepend(clone);

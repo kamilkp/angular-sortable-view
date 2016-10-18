@@ -1,4 +1,4 @@
-angular-sortable-view v0.0.15 [![Bower version](https://badge.fury.io/bo/angular-sortable-view.svg)](http://badge.fury.io/bo/angular-sortable-view)
+angular-sortable-view v0.0.17 [![Bower version](https://badge.fury.io/bo/angular-sortable-view.svg)](http://badge.fury.io/bo/angular-sortable-view)
 =================
 
 Fully declarative (multi)sortable for AngularJS
@@ -19,7 +19,7 @@ This library requires ***no dependencies whatsoever*** (except angular.js of cou
 
 The API is declarative. There are four directives (hooked on attributes) that need to be nested properly:
 
-  * `sv-root` - this is where all the logic is happening. If multiple lists should be connected with each other so that elements can be moved between them and they have a common ancestor, put this attribute on that element. If not and you still want the multi-sortable behaviour a value for that attribue must be provided. That value will be used as an identifier to connect those roots together.
+  * `sv-root` - this is where all the logic is happening. If multiple lists should be connected with each other so that elements can be moved between them and they have a common ancestor, put this attribute on that element. If not and you still want the multi-sortable behaviour a value for that attribue must be provided. That value will be used as an identifier to connect those roots together. Optionnally you can add `sv-disabled=boolean` to deactive dragging.
     **Optional attributes:**
     * `sv-on-sort` - The expression passed as a value of that attribute will be evaluated when elements order has changed after sorting. Several parameters can be injected there like: `sv-on-sort="foo($item, $partFrom, $partTo, $indexFrom, $indexTo)"` where:
 				<ul>
@@ -46,7 +46,7 @@ The API is declarative. There are four directives (hooked on attributes) that ne
 				</ul>
 			</li>
   * `sv-part` - this attribute should be placed on an element that is a container for the `ngRepeat`'ed elements. Its value should be the same as the right hand side expression in `ng-repeat` attribute.
-  * `sv-element` - this attribute should be placed on the same element as `ng-repeat` attribute. Its (optional) value should be an expression that evaluates to the options object.
+  * `sv-element` - this attribute should be placed on the same element as `ng-repeat` attribute. Its (optional) value should be an expression that evaluates to the options object. Optionnally you can add `sv-disabled=boolean` to deactive dragging on this element.
   * `sv-handle` - this attribute is optional. If needed it can be placed on an element within the sortable element. This element will be the handle for sorting operations.
   * `sv-helper` - the element with this attribute will serve as a custom helper for sorting operations
   * `sv-placeholder` - the element with this attribute will serve as a custom placeholder for sorting operations
