@@ -252,7 +252,8 @@
 						onStop($scope, {
 							$part: originatingPart.model(originatingPart.scope),
 							$index: index,
-							$item: originatingPart.model(originatingPart.scope)[index]
+							$item: originatingPart.model(originatingPart.scope)[index],
+							$moved: !!$target
 						});
 
 						if($target){
