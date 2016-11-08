@@ -461,7 +461,7 @@
 					html.addClass('sv-sorting-in-progress');
 					html.on('mousemove touchmove', onMousemove).on('mouseup touchend touchcancel', function mouseup(e){
 						html.off('mousemove touchmove', onMousemove);
-						html.off('mouseup touchend', mouseup);
+						html.off('mouseup touchend touchcancel', mouseup);
 						html.removeClass('sv-sorting-in-progress');
 						if(moveExecuted){
 							$controllers[0].$drop($scope.$index, opts);
