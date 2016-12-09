@@ -417,7 +417,6 @@
 							'left': clientRect.left + document.body.scrollLeft + 'px',
 							'top': clientRect.top + document.body.scrollTop + 'px'
 						});
-						target.addClass('sv-visibility-hidden');
 					}
 					else{
 						clone = target.clone();
@@ -470,6 +469,9 @@
 						if(!moveExecuted){
 							$element.parent().prepend(clone);
 							moveExecuted = true;
+						}
+						if(helper){
+							target.addClass('sv-visibility-hidden');
 						}
 						$controllers[1].$moveUpdate(opts, {
 							x: e.clientX,
