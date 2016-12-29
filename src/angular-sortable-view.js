@@ -41,6 +41,14 @@
 				var isGrid       = false;
 				var onSort       = $parse($attrs.svOnSort);
 
+				// ----- fix for multiple page list (when pagination is made on front-end);
+				// ----- index is recalculated depending on page
+				var startIndex = 0;
+				$attrs.$observe('svIndex', function (value) {
+					startIndex = parseInt(value) > 0 ? parseInt(value) : 0;
+				});
+				// -------------------------------------------------------------------
+
 				// ----- hack due to https://github.com/angular/angular.js/issues/8044
 				$attrs.svOnStart = $attrs.$$element[0].attributes['sv-on-start'];
 				$attrs.svOnStart = $attrs.svOnStart && $attrs.svOnStart.value;
@@ -212,6 +220,8 @@
 				this.$drop = function(originatingPart, index, options){
 					if(!$placeholder) return;
 
+					index += startIndex;
+
 					if(options.revert){
 						var placeholderRect = $placeholder[0].getBoundingClientRect();
 						var helperRect = $helper[0].getBoundingClientRect();
@@ -258,8 +268,8 @@
 						if($target){
 							$target.element.removeClass('sv-candidate');
 							var spliced = originatingPart.model(originatingPart.scope).splice(index, 1);
-							var targetIndex = $target.targetIndex;
-							if($target.view === originatingPart && $target.targetIndex > index)
+							var targetIndex = $target.targetIndex + startIndex;
+							if($target.view === originatingPart && $target.targetIndex + startIndex > index)
 								targetIndex--;
 							if($target.after)
 								targetIndex++;
