@@ -15,6 +15,20 @@ This is a simple library written as a module for [AngularJS](https://github.com/
 
 This library requires ***no dependencies whatsoever*** (except angular.js of course), so ***you no longer need to include jQuery and jQueryUI and angularUI*** which altogether gives the size of around ***340kB minified***. Whereas the [angular-sortable-view](https://github.com/kamilkp/angular-sortable-view) is only ***5kB minified!***.
 
+###INSTALLATION
+Include angular-sortable-view.min.js in your application
+
+Via cdnjs
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/angular-sortable-view/0.0.15/angular-sortable-view.min.js"></script>
+Via Bower
+
+    bower install angular-sortable-view
+
+Add angular-sortable-view as a dependency in your application.
+
+    angular.module('yourApp', ['angular-sortable-view'])
+    
 ###API:
 
 The API is declarative. There are four directives (hooked on attributes) that need to be nested properly:
