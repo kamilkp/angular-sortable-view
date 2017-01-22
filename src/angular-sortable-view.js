@@ -15,7 +15,7 @@
 			return isGrid ? elem.x - pointer.x < 0 : elem.y - pointer.y < 0;
 		}
 		function getSortableElements(key){
-			return ROOTS_MAP[key];
+			return ROOTS_MAP[key] || [];
 		}
 		function removeSortableElements(key){
 			delete ROOTS_MAP[key];
