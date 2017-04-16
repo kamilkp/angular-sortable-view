@@ -9,13 +9,13 @@ You can find the source code for this demo on branch "gh-pages".
 
 Also see the changelog [here](https://github.com/kamilkp/angular-sortable-view/blob/master/CHANGELOG.md)
 
-###DESCRIPTION:
+### DESCRIPTION:
 
 This is a simple library written as a module for [AngularJS](https://github.com/angular/angular.js) for sorting elements in the UI. It supports both single elements list, and multiple connected lists, where an element can be moved from one to another.
 
 This library requires ***no dependencies whatsoever*** (except angular.js of course), so ***you no longer need to include jQuery and jQueryUI and angularUI*** which altogether gives the size of around ***340kB minified***. Whereas the [angular-sortable-view](https://github.com/kamilkp/angular-sortable-view) is only ***5kB minified!***.
 
-###API:
+### API:
 
 The API is declarative. There are four directives (hooked on attributes) that need to be nested properly:
 
@@ -51,7 +51,7 @@ The API is declarative. There are four directives (hooked on attributes) that ne
   * `sv-helper` - the element with this attribute will serve as a custom helper for sorting operations
   * `sv-placeholder` - the element with this attribute will serve as a custom placeholder for sorting operations
 
-###Example of single sortable list
+### Example of single sortable list
 
 ```html
 <div sv-root sv-part="modelArray">
@@ -61,7 +61,7 @@ The API is declarative. There are four directives (hooked on attributes) that ne
 </div>
 ```
 
-###Example of multiple sortable lists with common ancestor
+### Example of multiple sortable lists with common ancestor
 
 ```html
 <div sv-root>
@@ -78,7 +78,7 @@ The API is declarative. There are four directives (hooked on attributes) that ne
 </div>
 ```
 
-###Example of multiple sortable lists without common ancestor
+### Example of multiple sortable lists without common ancestor
 
 ```html
 <div>
@@ -95,7 +95,7 @@ The API is declarative. There are four directives (hooked on attributes) that ne
 </div>
 ```
 
-###Example of using handles
+### Example of using handles
 
 ```html
 <div sv-root sv-part="modelArray">
@@ -106,7 +106,7 @@ The API is declarative. There are four directives (hooked on attributes) that ne
 </div>
 ```
 
-###Example of using custom helpers per part
+### Example of using custom helpers per part
 
 ```html
 <div sv-root sv-part="modelArray">
@@ -119,7 +119,7 @@ The API is declarative. There are four directives (hooked on attributes) that ne
 </div>
 ```
 
-###Example of using custom helpers per element
+### Example of using custom helpers per element
 
 ```html
 <div sv-root sv-part="modelArray">
@@ -132,7 +132,7 @@ The API is declarative. There are four directives (hooked on attributes) that ne
 </div>
 ```
 
-###Example of using custom placeholders per part
+### Example of using custom placeholders per part
 
 ```html
 <div sv-root sv-part="modelArray">
@@ -145,7 +145,7 @@ The API is declarative. There are four directives (hooked on attributes) that ne
 </div>
 ```
 
-###Example of using custom placeholders per element
+### Example of using custom placeholders per element
 
 ```html
 <div sv-root sv-part="modelArray">
@@ -158,7 +158,7 @@ The API is declarative. There are four directives (hooked on attributes) that ne
 </div>
 ```
 
-###Example of sorting with images
+### Example of sorting with images
 _Because images are draggable by default the browser will trigger the default behavior of showing an image's ghost on a drag event rather than the mousedown event listener relied on by this module, disabling that drag behavior leaves the element free to move immediately._
 
 ```html
