@@ -447,8 +447,8 @@
 							if(targetLeft + helperRect.width > containmentRect.left + body.scrollLeft + containmentRect.width) // right boundary
 								targetLeft = containmentRect.left + body.scrollLeft + containmentRect.width - helperRect.width;
 
-              targetLeft -= containmentRect.left;
-              targetTop  -= containmentRect.top;
+							targetLeft -= containmentRect.left;
+							targetTop  -= containmentRect.top;
 						}
 						this.style.left = targetLeft - body.scrollLeft + 'px';
 						this.style.top = targetTop - body.scrollTop + 'px';
