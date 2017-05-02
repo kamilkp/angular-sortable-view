@@ -361,7 +361,12 @@
 					handle.off('mousedown touchstart', onMousedown);
 				});
 
-				handle.on('mousedown touchstart', onMousedown);
+				$attrs.$observe('svDisabled', function(disabled) {
+					disabled = $scope.$eval(disabled);
+					if (!disabled) handle.on('mousedown touchstart', onMousedown);
+					else handle.off('mousedown touchstart', onMousedown);
+				});
+
 				$scope.$watch('$ctrl.handle', function(customHandle){
 					if(customHandle){
 						handle.off('mousedown touchstart', onMousedown);
