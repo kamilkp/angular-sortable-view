@@ -22,6 +22,8 @@
 		}
 
 		var sortingInProgress;
+		var isDisabled = false;
+
 		var ROOTS_MAP = Object.create(null);
 		// window.ROOTS_MAP = ROOTS_MAP; // for debug purposes
 
@@ -54,6 +56,16 @@
 
 				this.sortingInProgress = function(){
 					return sortingInProgress;
+				};
+
+				if ($attrs.svDisabled) {
+					$scope.$watch($attrs.svDisabled, function(disabled) {
+						isDisabled = disabled === true;
+					});
+				}
+
+				this.isDisabled = function() {
+					return isDisabled;
 				};
 
 				if($attrs.svGrid){ // sv-grid determined explicite
@@ -361,12 +373,7 @@
 					handle.off('mousedown touchstart', onMousedown);
 				});
 
-				$attrs.$observe('svDisabled', function(disabled) {
-					disabled = $scope.$eval(disabled);
-					if (!disabled) handle.on('mousedown touchstart', onMousedown);
-					else handle.off('mousedown touchstart', onMousedown);
-				});
-
+				handle.on('mousedown touchstart', onMousedown);
 				$scope.$watch('$ctrl.handle', function(customHandle){
 					if(customHandle){
 						handle.off('mousedown touchstart', onMousedown);
@@ -397,7 +404,7 @@
 				function onMousedown(e){
 					touchFix(e);
 
-					if($controllers[1].sortingInProgress()) return;
+					if($controllers[1].isDisabled() || $controllers[1].sortingInProgress()) return;
 					if(e.button != 0 && e.type === 'mousedown') return;
 
 					moveExecuted = false;
