@@ -420,6 +420,7 @@
 
 					var target = $element;
 					var clientRect = $element[0].getBoundingClientRect();
+					var parentRect = getPositionedParentRect($element[0]);
 					var clone;
 
 					if(!helper) helper = $controllers[0].helper;
@@ -459,8 +460,10 @@
 							if(targetLeft + helperRect.width > containmentRect.left + body.scrollLeft + containmentRect.width) // right boundary
 								targetLeft = containmentRect.left + body.scrollLeft + containmentRect.width - helperRect.width;
 
-							targetLeft -= containmentRect.left;
-							targetTop  -= containmentRect.top;
+							if (parentRect) {
+								targetLeft -= parentRect.left;
+								targetTop  -= parentRect.top;
+							}
 						}
 						this.style.left = targetLeft - body.scrollLeft + 'px';
 						this.style.top = targetTop - body.scrollTop + 'px';
@@ -497,6 +500,16 @@
 							y: moveEv.clientY,
 							offset: pointerOffset
 						}, clone, $element, placeholder, $controllers[0].getPart(), $scope.$index);
+					}
+				}
+
+				function getPositionedParentRect(el) {
+					while (el !== document.documentElement) {
+						el = el.parentNode;
+						var cssPos = el.style.position;
+						if (cssPos != '' && cssPos != 'static') {
+							return el.getBoundingClientRect();
+						}
 					}
 				}
 			}
