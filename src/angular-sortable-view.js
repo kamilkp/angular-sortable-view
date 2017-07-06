@@ -22,6 +22,8 @@
 		}
 
 		var sortingInProgress;
+		var isDisabled = false;
+
 		var ROOTS_MAP = Object.create(null);
 		// window.ROOTS_MAP = ROOTS_MAP; // for debug purposes
 
@@ -54,6 +56,16 @@
 
 				this.sortingInProgress = function(){
 					return sortingInProgress;
+				};
+
+				if ($attrs.svDisabled) {
+					$scope.$watch($attrs.svDisabled, function(disabled) {
+						isDisabled = disabled === true;
+					});
+				}
+
+				this.isDisabled = function() {
+					return isDisabled;
 				};
 
 				if($attrs.svGrid){ // sv-grid determined explicite
@@ -353,12 +365,14 @@
 						return $scope.$index;
 					}
 				};
+				var handle = $element;
+
 				$controllers[1].addToSortableElements(sortableElement);
 				$scope.$on('$destroy', function(){
 					$controllers[1].removeFromSortableElements(sortableElement);
+					handle.off('mousedown touchstart', onMousedown);
 				});
 
-				var handle = $element;
 				handle.on('mousedown touchstart', onMousedown);
 				$scope.$watch('$ctrl.handle', function(customHandle){
 					if(customHandle){
@@ -390,7 +404,7 @@
 				function onMousedown(e){
 					touchFix(e);
 
-					if($controllers[1].sortingInProgress()) return;
+					if($controllers[1].isDisabled() || $controllers[1].sortingInProgress()) return;
 					if(e.button != 0 && e.type === 'mousedown') return;
 
 					moveExecuted = false;
@@ -406,6 +420,7 @@
 
 					var target = $element;
 					var clientRect = $element[0].getBoundingClientRect();
+					var parentRect = getPositionedParentRect($element[0]);
 					var clone;
 
 					if(!helper) helper = $controllers[0].helper;
@@ -444,6 +459,11 @@
 								targetLeft = containmentRect.left + body.scrollLeft;
 							if(targetLeft + helperRect.width > containmentRect.left + body.scrollLeft + containmentRect.width) // right boundary
 								targetLeft = containmentRect.left + body.scrollLeft + containmentRect.width - helperRect.width;
+
+							if (parentRect) {
+								targetLeft -= parentRect.left;
+								targetTop  -= parentRect.top;
+							}
 						}
 						this.style.left = targetLeft - body.scrollLeft + 'px';
 						this.style.top = targetTop - body.scrollTop + 'px';
@@ -465,17 +485,31 @@
 					});
 
 					// onMousemove(e);
-					function onMousemove(e){
-						touchFix(e);
+					function onMousemove(moveEv){
+						touchFix(moveEv);
+						var jiggle = Math.abs(moveEv.clientY - e.clientY)
+							         + Math.abs(moveEv.clientX - e.clientX);
+						if (jiggle < 10) return;
 						if(!moveExecuted){
 							$element.parent().prepend(clone);
 							moveExecuted = true;
 						}
+
 						$controllers[1].$moveUpdate(opts, {
-							x: e.clientX,
-							y: e.clientY,
+							x: moveEv.clientX,
+							y: moveEv.clientY,
 							offset: pointerOffset
 						}, clone, $element, placeholder, $controllers[0].getPart(), $scope.$index);
+					}
+				}
+
+				function getPositionedParentRect(el) {
+					while (el !== document.documentElement) {
+						el = el.parentNode;
+						var cssPos = window.getComputedStyle(el, null).position;
+						if (cssPos != '' && cssPos != 'static') {
+							return el.getBoundingClientRect();
+						}
 					}
 				}
 			}
