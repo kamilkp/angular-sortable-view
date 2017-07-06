@@ -506,7 +506,7 @@
 				function getPositionedParentRect(el) {
 					while (el !== document.documentElement) {
 						el = el.parentNode;
-						var cssPos = el.style.position;
+						var cssPos = window.getComputedStyle(el, null).position;
 						if (cssPos != '' && cssPos != 'static') {
 							return el.getBoundingClientRect();
 						}
