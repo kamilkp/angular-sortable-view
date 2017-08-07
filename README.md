@@ -1,4 +1,4 @@
-angular-sortable-view v0.0.12 [![Bower version](https://badge.fury.io/bo/angular-sortable-view.svg)](http://badge.fury.io/bo/angular-sortable-view)
+angular-sortable-view v0.0.15 [![Bower version](https://badge.fury.io/bo/angular-sortable-view.svg)](http://badge.fury.io/bo/angular-sortable-view)
 =================
 
 Fully declarative (multi)sortable for AngularJS
@@ -38,7 +38,7 @@ The API is declarative. There are four directives (hooked on attributes) that ne
 					<li>`$helper` is the jqLite/jQuery object of an element that is being dragged around</li>
 				</ul>
 			</li>
-			<li>`sv-on-stop` - The expression passed as a value of that attribute will be evaluated when a user stops moving an element (drops it). This will be called regardless of the fact whether elements have been reordered or now. Several parameters can be injected there like: `sv-on-end="baz($item, $part, $index)"` where:
+			<li>`sv-on-stop` - The expression passed as a value of that attribute will be evaluated when a user stops moving an element (drops it). This will be called regardless of the fact whether elements have been reordered or now. Several parameters can be injected there like: `sv-on-stop="baz($item, $part, $index)"` where:
 				<ul>
 					<li>`$item` is the item in model which started being moved</li>
 					<li>`$part` is the part from which the $item originates</li>
@@ -49,7 +49,7 @@ The API is declarative. There are four directives (hooked on attributes) that ne
   * `sv-element` - this attribute should be placed on the same element as `ng-repeat` attribute. Its (optional) value should be an expression that evaluates to the options object.
   * `sv-handle` - this attribute is optional. If needed it can be placed on an element within the sortable element. This element will be the handle for sorting operations.
   * `sv-helper` - the element with this attribute will serve as a custom helper for sorting operations
-  * `sv-placeholder` - the element with this attribute will serve as a custom placeholder for sorting operations  
+  * `sv-placeholder` - the element with this attribute will serve as a custom placeholder for sorting operations
 
 ###Example of single sortable list
 
@@ -154,6 +154,17 @@ The API is declarative. There are four directives (hooked on attributes) that ne
 			custom placeholder {{item}}
 		</div>
 		{{item}}
+	</div>
+</div>
+```
+
+###Example of sorting with images
+_Because images are draggable by default the browser will trigger the default behavior of showing an image's ghost on a drag event rather than the mousedown event listener relied on by this module, disabling that drag behavior leaves the element free to move immediately._
+
+```html
+<div sv-root sv-part="photosArray">
+	<div ng-repeat="photo in photosArray" sv-element>
+		<img draggable="false" ng-src="{{photo.url}}" />
 	</div>
 </div>
 ```

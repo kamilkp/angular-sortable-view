@@ -1,12 +1,13 @@
 //
 // Copyright Kamil Pękala http://github.com/kamilkp
-// angular-sortable-view v0.0.11 2014/11/28
+// angular-sortable-view v0.0.15 2015/01/18
 //
 
 ;(function(window, angular){
 	'use strict';
 	/* jshint eqnull:true */
 	/* jshint -W041 */
+	/* jshint -W030 */
 
 	var module = angular.module('angular-sortable-view', []);
 	module.directive('svRoot', [function(){
@@ -43,14 +44,14 @@
 				
 				// ----- hack due to https://github.com/angular/angular.js/issues/8044
 				$attrs.svOnStart = $attrs.$$element[0].attributes['sv-on-start'];
-				$attrs.svOnStart = $attrs.svOnStart && $attrs.svOnStart.value; 
+				$attrs.svOnStart = $attrs.svOnStart && $attrs.svOnStart.value;
 
 				$attrs.svOnStop = $attrs.$$element[0].attributes['sv-on-stop'];
-				$attrs.svOnStop = $attrs.svOnStop && $attrs.svOnStop.value; 
+				$attrs.svOnStop = $attrs.svOnStop && $attrs.svOnStop.value;
 				// -------------------------------------------------------------------
 
 				var onStart = $parse($attrs.svOnStart);
-				var onStop = $parse($attrs.svOnStop);				
+				var onStop = $parse($attrs.svOnStop);
 
 				this.sortingInProgress = function(){
 					return sortingInProgress;
@@ -140,7 +141,7 @@
 						$helper = svElement;
 
 						onStart($scope, {
-							$helper: $helper,
+							$helper: {element: $helper},
 							$part: originatingPart.model(originatingPart.scope),
 							$index: originatingIndex,
 							$item: originatingPart.model(originatingPart.scope)[originatingIndex]
@@ -258,7 +259,7 @@
 						options = void 0;
 						$helper = void 0;
 						$original = void 0;
-						
+
 						// sv-on-stop callback
 						onStop($scope, {
 							$part: originatingPart.model(originatingPart.scope),
@@ -289,8 +290,7 @@
 						}
 						$target = void 0;
 
-						if($scope.$root)
-							$scope.$root.$$phase || $scope.$apply();
+						$scope.$root && $scope.$root.$$phase || $scope.$apply();
 					}
 				};
 
@@ -396,7 +396,7 @@
 
 				var body = angular.element(document.body);
 				var html = angular.element(document.documentElement);
-				
+
 				var moveExecuted;
 
 				function onMousedown(e){
@@ -468,12 +468,12 @@
 					html.addClass('sv-sorting-in-progress');
 					html.on('mousemove touchmove', onMousemove).on('mouseup touchend touchcancel', function mouseup(e){
 						html.off('mousemove touchmove', onMousemove);
-						html.off('mouseup touchend', mouseup);
+						html.off('mouseup touchend touchcancel', mouseup);
 						html.removeClass('sv-sorting-in-progress');
-						if(moveExecuted)
+						if(moveExecuted){
 							$controllers[0].$drop($scope.$index, opts);
-						else
-							$element.removeClass('sv-visibility-hidden');
+						}
+						$element.removeClass('sv-visibility-hidden');
 					});
 
 					// onMousemove(e);
@@ -616,5 +616,22 @@
 		else
 			return angular.element();
 	};
+
+	/*
+		Simple implementation of jQuery's .add method
+	 */
+	if(typeof angular.element.prototype.add !== 'function'){
+		angular.element.prototype.add = function(elem){
+			var i, res = angular.element();
+			elem = angular.element(elem);
+			for(i=0;i<this.length;i++){
+				res.push(this[i]);
+			}
+			for(i=0;i<elem.length;i++){
+				res.push(elem[i]);
+			}
+			return res;
+		};
+	}
 
 })(window, window.angular);
