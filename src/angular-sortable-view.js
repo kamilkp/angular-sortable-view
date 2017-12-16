@@ -388,6 +388,9 @@
 				var moveExecuted;
 
 				function onMousedown(e){
+					if($parse($attrs.svStop)($scope)) {
+                        return;
+                    }
 					touchFix(e);
 
 					if($controllers[1].sortingInProgress()) return;
