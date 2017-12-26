@@ -1,6 +1,6 @@
 //
 // Copyright Kamil Pękala http://github.com/kamilkp
-// angular-sortable-view v0.0.15 2015/01/18
+// angular-sortable-view v0.0.16 2017/12/26
 //
 
 ;(function(window, angular){
@@ -121,7 +121,9 @@
 						}
 
 						svOriginal.after($placeholder);
-						svOriginal.addClass('ng-hide');
+						if (!originatingPart.copyMode) {
+							svOriginal.addClass('ng-hide');
+						}
 
 						// cache options, helper and original element reference
 						$original = svOriginal;
@@ -157,20 +159,45 @@
 							x: ~~(rect.left + rect.width/2),
 							y: ~~(rect.top + rect.height/2)
 						};
-						if(!se.container && // not the container element
-							(se.element[0].scrollHeight || se.element[0].scrollWidth)){ // element is visible
+
+						var centerHoriz = {
+							x: ~~(rect.left + rect.width/2),
+							y: ~~(rect.top)
+						};
+
+						var centerVert = {
+							x: ~~(rect.left),
+							y: ~~(rect.top + rect.height/2)
+						};
+
+						if(
+							!se.container && // not the container element
+							(se.element[0].scrollHeight || se.element[0].scrollWidth)
+						){ // element is visible
+							var sePart = se.getPart();
 							candidates.push({
 								element: se.element,
 								q: (center.x - mouse.x)*(center.x - mouse.x) + (center.y - mouse.y)*(center.y - mouse.y),
-								view: se.getPart(),
+								view: sePart,
 								targetIndex: se.getIndex(),
-								after: shouldBeAfter(center, mouse, isGrid)
+								after: shouldBeAfter(center, mouse, ('isGrid' in sePart) ? sePart.isGrid : isGrid)
 							});
 						}
-						if(se.container && !se.element[0].querySelector('[sv-element]:not(.sv-placeholder):not(.sv-source)')){ // empty container
+
+						if(
+							se.container &&
+							!se.element[0].querySelector('[sv-element]:not(.sv-placeholder):not(.sv-source)') // empty container
+						){
+							var c = center;
+							if (se.centerVariant === 'vertical') {
+								c = centerVert;
+							} else if (se.centerVariant === 'horizontal') {
+								c = centerHoriz;
+							}
+
 							candidates.push({
 								element: se.element,
-								q: (center.x - mouse.x)*(center.x - mouse.x) + (center.y - mouse.y)*(center.y - mouse.y),
+								q: (c.x - mouse.x)*(c.x - mouse.x) + (c.y - mouse.y)*(c.y - mouse.y),
 								view: se.getPart(),
 								targetIndex: 0,
 								container: true
@@ -212,7 +239,7 @@
 				this.$drop = function(originatingPart, index, options){
 					if(!$placeholder) return;
 
-					if(options.revert){
+					if(options.revert && !($target && $target.view && $target.view.noRevert)){
 						var placeholderRect = $placeholder[0].getBoundingClientRect();
 						var helperRect = $helper[0].getBoundingClientRect();
 						var distance = Math.sqrt(
@@ -321,14 +348,22 @@
 					id: $scope.$id,
 					element: $element,
 					model: model,
+					copyMode: $attrs.svCopy === 'true',
+					noRevert: $attrs.svNoRevert === 'true',
 					scope: $scope
 				};
+
+				if ('isGrid' in $attrs) {
+					$scope.part.isGrid = $attrs.isGrid === 'true';
+				}
+
 				$scope.$sortableRoot = $sortable;
 
 				var sortablePart = {
 					element: $element,
 					getPart: $scope.$ctrl.getPart,
-					container: true
+					container: true,
+					centerVariant: $attrs.svCenter || 'both',
 				};
 				$sortable.addToSortableElements(sortablePart);
 				$scope.$on('$destroy', function(){
@@ -392,6 +427,9 @@
 
 					if($controllers[1].sortingInProgress()) return;
 					if(e.button != 0 && e.type === 'mousedown') return;
+
+					var svHandleDisabledAttr = e.target.attributes['sv-handle-disabled'];
+					if(svHandleDisabledAttr && svHandleDisabledAttr.value === 'true') return;
 
 					moveExecuted = false;
 					var opts = $parse($attrs.svElement)($scope);
@@ -622,4 +660,4 @@
 		};
 	}
 
-})(window, window.angular);
+})(window, angular);

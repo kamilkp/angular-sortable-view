@@ -1,4 +1,4 @@
-angular-sortable-view v0.0.15 [![Bower version](https://badge.fury.io/bo/angular-sortable-view.svg)](http://badge.fury.io/bo/angular-sortable-view)
+angular-sortable-view v0.0.16 [![Bower version](https://badge.fury.io/bo/angular-sortable-view.svg)](http://badge.fury.io/bo/angular-sortable-view)
 =================
 
 Fully declarative (multi)sortable for AngularJS
@@ -46,10 +46,20 @@ The API is declarative. There are four directives (hooked on attributes) that ne
 				</ul>
 			</li>
   * `sv-part` - this attribute should be placed on an element that is a container for the `ngRepeat`'ed elements. Its value should be the same as the right hand side expression in `ng-repeat` attribute.
+	  **Optional attributes:**
+		* `sv-copy` - default `false`. If `true` then elementes dragged out of this container will be copied instead of moved
+		* `is-grid` - dafault `false`. If `true` then it means that elements on this container are aligned horizontally (multiline possible)
+		* `sv-no-revert` - default `false`. If `true` then elements dropped into this container will not be animated
+		* `sv-center` - to set how the "center" of the container (for dropping into empty container purposes) should be comprehended (more in readme). Allowed values:
+		  * `both` (default) - a point in both vertical and horizontal center
+			* `vertical` - a point in vertical center on the left edge of the container
+			* `horizontal` - a point in horizontal center on the top edge of the container
   * `sv-element` - this attribute should be placed on the same element as `ng-repeat` attribute. Its (optional) value should be an expression that evaluates to the options object.
   * `sv-handle` - this attribute is optional. If needed it can be placed on an element within the sortable element. This element will be the handle for sorting operations.
   * `sv-helper` - the element with this attribute will serve as a custom helper for sorting operations
   * `sv-placeholder` - the element with this attribute will serve as a custom placeholder for sorting operations
+
+You can place a `sv-handle-disabled` on `sv-element` (or `sv-handle` if you use it to the corresponding element). If the expression set as a value of this attribute evaluates to `true` then it won't be possible to drag this element.
 
 ###Example of single sortable list
 

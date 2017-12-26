@@ -1,3 +1,13 @@
+Version 0.0.16 - 2017/12/26
+================
+
+  * `sv-copy` on `sv-part` menaing that elementes dragged out of this container will be copied instead of moved
+  * `is-grid` on `sv-part` meaning the elements on this container are aligned horizontally (multiline possible)
+  * `sv-no-revert` on `sv-part` meaning the elements dropped into this container will not be animated
+  * `sv-center` on `sv-part` to set how the "center" of the container (for dropping into empty container purposes) should be comprehended (more in readme)
+  * `sv-handle-disabled` on `sv-element`/`sv-handle` - to disable an element from dragging
+
+
 Version 0.0.15 - 2016/01/18
 ================
 
