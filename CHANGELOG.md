@@ -1,3 +1,7 @@
+Version 0.0.17 - 2017/12/26
+================
+  * enhanced distance calculation algorithm while repositioning
+
 Version 0.0.16 - 2017/12/26
 ================
 

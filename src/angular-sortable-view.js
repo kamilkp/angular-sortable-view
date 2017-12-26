@@ -1,6 +1,6 @@
 //
 // Copyright Kamil Pękala http://github.com/kamilkp
-// angular-sortable-view v0.0.16 2017/12/26
+// angular-sortable-view v0.0.17 2017/12/26
 //
 
 ;(function(window, angular){
@@ -19,6 +19,27 @@
 		}
 		function removeSortableElements(key){
 			delete ROOTS_MAP[key];
+		}
+		function getCoords(rect) {
+			return [
+				{ x: rect.left, y: rect.top },
+				{ x: rect.left + rect.width, y: rect.top },
+				{ x: rect.left, y: rect.top + rect.height },
+				{ x: rect.left + rect.width, y: rect.top + rect.height },
+				{ x: rect.left + rect.width/2, y: rect.top + rect.height/2 },
+			];
+		}
+		function getDistance(point, coords) {
+			if (
+				point.x >= coords[0].x && point.x <= coords[1].x &&
+				point.y >= coords[0].y && point.y <= coords[2].y
+			) {
+				return 0;
+			}
+
+			return Math.min.apply(Math, coords.map(function(coord){
+				return (coord.x - point.x)*(coord.x - point.x) + (coord.y - point.y)*(coord.y - point.y);
+			}));
 		}
 
 		var sortingInProgress;
@@ -145,7 +166,7 @@
 						y: mouse.y + document.body.scrollTop - mouse.offset.y*svRect.height
 					});
 
-					// ----- manage candidates
+					// ------ manage candidates
 					getSortableElements(mapKey).forEach(function(se, index){
 						if(opts.containment != null){
 							// TODO: optimize this since it could be calculated only once when the moving begins
@@ -155,6 +176,8 @@
 							) return; // element is not within allowed containment
 						}
 						var rect = se.element[0].getBoundingClientRect();
+						var seCoords = getCoords(rect);
+
 						var center = {
 							x: ~~(rect.left + rect.width/2),
 							y: ~~(rect.top + rect.height/2)
@@ -177,7 +200,7 @@
 							var sePart = se.getPart();
 							candidates.push({
 								element: se.element,
-								q: (center.x - mouse.x)*(center.x - mouse.x) + (center.y - mouse.y)*(center.y - mouse.y),
+								q: getDistance(mouse, seCoords),
 								view: sePart,
 								targetIndex: se.getIndex(),
 								after: shouldBeAfter(center, mouse, ('isGrid' in sePart) ? sePart.isGrid : isGrid)
@@ -205,12 +228,8 @@
 						}
 					});
 					var pRect = $placeholder[0].getBoundingClientRect();
-					var pCenter = {
-						x: ~~(pRect.left + pRect.width/2),
-						y: ~~(pRect.top + pRect.height/2)
-					};
 					candidates.push({
-						q: (pCenter.x - mouse.x)*(pCenter.x - mouse.x) + (pCenter.y - mouse.y)*(pCenter.y - mouse.y),
+						q: getDistance(mouse, getCoords(pRect)),
 						element: $placeholder,
 						placeholder: true
 					});
