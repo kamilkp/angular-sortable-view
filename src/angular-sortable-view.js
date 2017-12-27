@@ -502,8 +502,24 @@
 							if(targetLeft + helperRect.width > containmentRect.left + body.scrollLeft + containmentRect.width) // right boundary
 								targetLeft = containmentRect.left + body.scrollLeft + containmentRect.width - helperRect.width;
 						}
-						this.style.left = targetLeft - body.scrollLeft + 'px';
-						this.style.top = targetTop - body.scrollTop + 'px';
+
+						var add_left = 0;
+						var add_top = 0;
+
+						var scrl_left = 0;
+						var scrl_top = 0;
+
+						var modal_offset = $('.modal-dialog').offset();
+						if (typeof modal_offset != 'undefined') {
+							add_left = -(modal_offset.left);
+							add_top = -(modal_offset.top);
+						} else {
+							scrl_left = body.scrollLeft;
+							scrl_top = body.scrollTop;
+						}
+
+						this.style.left = targetLeft - scrl_left + add_left + 'px';
+						this.style.top = targetTop - scrl_top + add_top+ 'px';
 					};
 
 					var pointerOffset = {
