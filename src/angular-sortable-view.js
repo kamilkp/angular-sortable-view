@@ -447,7 +447,7 @@
 					if($controllers[1].sortingInProgress()) return;
 					if(e.button != 0 && e.type === 'mousedown') return;
 
-					var svHandleDisabledAttr = e.target.attributes['sv-handle-disabled'];
+					var svHandleDisabledAttr = handle[0].attributes['sv-handle-disabled'];
 					if(svHandleDisabledAttr && svHandleDisabledAttr.value === 'true') return;
 
 					moveExecuted = false;

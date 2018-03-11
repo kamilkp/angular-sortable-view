@@ -48,7 +48,7 @@ The API is declarative. There are four directives (hooked on attributes) that ne
   * `sv-part` - this attribute should be placed on an element that is a container for the `ngRepeat`'ed elements. Its value should be the same as the right hand side expression in `ng-repeat` attribute.
     **Optional attributes:**
     * `sv-copy` - default `false`. If `true` then elementes dragged out of this container will be copied instead of moved
-    * `is-grid` - dafault `false`. If `true` then it means that elements on this container are aligned horizontally (multiline possible)
+    * `sv-grid` - default `false`. If `true` then it means that elements on this container are aligned horizontally (multiline possible)
     * `sv-no-revert` - default `false`. If `true` then elements dropped into this container will not be animated
     * `sv-center` - to set how the "center" of the container (for dropping into empty container purposes) should be comprehended (more in readme). Allowed values:
       * `both` (default) - a point in both vertical and horizontal center
