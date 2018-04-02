@@ -10,7 +10,7 @@
 	/* jshint -W030 */
 
 	var module = angular.module('angular-sortable-view', []);
-	module.directive('svRoot', [function(){
+	module.directive('svRoot', ['svProvider', function(svProvider){
 		function shouldBeAfter(elem, pointer, isGrid){
 			return isGrid ? elem.x - pointer.x < 0 : elem.y - pointer.y < 0;
 		}
@@ -118,6 +118,7 @@
 
 				this.$moveUpdate = function(opts, mouse, svElement, svOriginal, svPlaceholder, originatingPart, originatingIndex){
 					var svRect = svElement[0].getBoundingClientRect();
+					var scrollingElement = svProvider.getScrollingElement();
 					if(opts.tolerance === 'element')
 						mouse = {
 							x: ~~(svRect.left + svRect.width/2),
@@ -162,8 +163,8 @@
 
 					// ----- move the element
 					$helper[0].reposition({
-						x: mouse.x + document.body.scrollLeft - mouse.offset.x*svRect.width,
-						y: mouse.y + document.body.scrollTop - mouse.offset.y*svRect.height
+						x: mouse.x + scrollingElement.scrollLeft - mouse.offset.x*svRect.width,
+						y: mouse.y + scrollingElement.scrollTop - mouse.offset.y*svRect.height
 					});
 
 					// ------ manage candidates
@@ -265,6 +266,7 @@
 							Math.pow(helperRect.top - placeholderRect.top, 2) +
 							Math.pow(helperRect.left - placeholderRect.left, 2)
 						);
+						var scrollingElement = svProvider.getScrollingElement();
 
 						var duration = +options.revert*distance/200; // constant speed: duration depends on distance
 						duration = Math.min(duration, +options.revert); // however it's not longer that options.revert
@@ -275,8 +277,8 @@
 						});
 						setTimeout(afterRevert, duration);
 						$helper.css({
-							'top': placeholderRect.top + document.body.scrollTop + 'px',
-							'left': placeholderRect.left + document.body.scrollLeft + 'px'
+							'top': placeholderRect.top + scrollingElement.scrollTop + 'px',
+							'left': placeholderRect.left + scrollingElement.scrollLeft + 'px'
 						});
 					}
 					else
@@ -392,7 +394,7 @@
 		};
 	}]);
 
-	module.directive('svElement', ['$parse', function($parse){
+	module.directive('svElement', ['$parse', 'svProvider', function($parse, svProvider){
 		return {
 			restrict: 'A',
 			require: ['^svPart', '^svRoot'],
@@ -464,6 +466,7 @@
 					var target = $element;
 					var clientRect = $element[0].getBoundingClientRect();
 					var clone;
+                    var scrollingElement = svProvider.getScrollingElement();
 
 					if(!helper) helper = $controllers[0].helper;
 					if(!placeholder) placeholder = $controllers[0].placeholder;
@@ -471,16 +474,16 @@
 						clone = helper.clone();
 						clone.removeClass('ng-hide');
 						clone.css({
-							'left': clientRect.left + document.body.scrollLeft + 'px',
-							'top': clientRect.top + document.body.scrollTop + 'px'
+							'left': clientRect.left + scrollingElement.scrollLeft + 'px',
+							'top': clientRect.top + scrollingElement.scrollTop + 'px'
 						});
 						target.addClass('sv-visibility-hidden');
 					}
 					else{
 						clone = target.clone();
 						clone.addClass('sv-helper').css({
-							'left': clientRect.left + document.body.scrollLeft + 'px',
-							'top': clientRect.top + document.body.scrollTop + 'px',
+							'left': clientRect.left + scrollingElement.scrollLeft + 'px',
+							'top': clientRect.top + scrollingElement.scrollTop + 'px',
 							'width': clientRect.width + 'px'
 						});
 					}
@@ -490,20 +493,18 @@
 						var targetTop = coords.y;
 						var helperRect = clone[0].getBoundingClientRect();
 
-						var body = document.body;
-
 						if(containmentRect){
-							if(targetTop < containmentRect.top + body.scrollTop) // top boundary
-								targetTop = containmentRect.top + body.scrollTop;
-							if(targetTop + helperRect.height > containmentRect.top + body.scrollTop + containmentRect.height) // bottom boundary
-								targetTop = containmentRect.top + body.scrollTop + containmentRect.height - helperRect.height;
-							if(targetLeft < containmentRect.left + body.scrollLeft) // left boundary
-								targetLeft = containmentRect.left + body.scrollLeft;
-							if(targetLeft + helperRect.width > containmentRect.left + body.scrollLeft + containmentRect.width) // right boundary
-								targetLeft = containmentRect.left + body.scrollLeft + containmentRect.width - helperRect.width;
+							if(targetTop < containmentRect.top + scrollingElement.scrollTop) // top boundary
+								targetTop = containmentRect.top + scrollingElement.scrollTop;
+							if(targetTop + helperRect.height > containmentRect.top + scrollingElement.scrollTop + containmentRect.height) // bottom boundary
+								targetTop = containmentRect.top + scrollingElement.scrollTop + containmentRect.height - helperRect.height;
+							if(targetLeft < containmentRect.left + scrollingElement.scrollLeft) // left boundary
+								targetLeft = containmentRect.left + scrollingElement.scrollLeft;
+							if(targetLeft + helperRect.width > containmentRect.left + scrollingElement.scrollLeft + containmentRect.width) // right boundary
+								targetLeft = containmentRect.left + scrollingElement.scrollLeft + containmentRect.width - helperRect.width;
 						}
-						this.style.left = targetLeft - body.scrollLeft + 'px';
-						this.style.top = targetTop - body.scrollTop + 'px';
+						this.style.left = targetLeft - scrollingElement.scrollLeft + 'px';
+						this.style.top = targetTop - scrollingElement.scrollTop + 'px';
 					};
 
 					var pointerOffset = {
@@ -574,6 +575,22 @@
 			}
 		};
 	});
+
+    module.provider('sv', function svProvider() {
+        var scrollingSelector = '';
+
+        this.getScrollingElement = function() {
+            var d = document;
+            if(scrollingSelector) return d.querySelector(scrollingSelector);
+            return defaultScrollingElement();
+        };
+
+		// can be element or CSS selector
+        this.setScrollingElement = function(element) {
+            if(!element || (typeof element !== "string" && !(element instanceof Node))) return;
+            scrollingSelector = element;
+        };
+    });
 
 	angular.element(document.head).append([
 		'<style>' +
@@ -678,5 +695,18 @@
 			return res;
 		};
 	}
+
+	/*
+		get defaultScrollingElement polyfill
+	 */
+
+    function defaultScrollingElement() {
+        var d = document;
+        if (d.scrollingElement) return d.scrollingElement;
+        return  d.documentElement.scrollHeight > d.body.scrollHeight &&
+        d.compatMode.indexOf('CSS1') == 0 ?
+            d.documentElement :
+            d.body;
+    }
 
 })(window, angular);

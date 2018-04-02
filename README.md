@@ -178,3 +178,17 @@ _Because images are draggable by default the browser will trigger the default be
 	</div>
 </div>
 ```
+
+### Example of configuring Scrolling Element
+_In most modern browsers document.documentElement is used as a default scrolling element, in some older ones document.body. In latest CSS Object Model draft we have document.scrollingElement.
+ Based on need to define scrolling element for any browser we added setScrollingSelector config.
+ It expects DOM element or CSS selector._
+
+```js
+myApp.config(["svProvider", function(svProvider) {
+    // To specifically define scrolling parent element of your choice you can use: 
+    // DOM elements or CSS selectors:
+    // e.g. svProvider.setScrollingElement(document.body);
+    svProvider.setScrollingElement('.main-container');
+}]);
+```
