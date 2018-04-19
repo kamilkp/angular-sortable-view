@@ -410,6 +410,8 @@
 				$controllers[1].addToSortableElements(sortableElement);
 				$scope.$on('$destroy', function(){
 					$controllers[1].removeFromSortableElements(sortableElement);
+					html.unbind('mousemove touchmove mouseup touchend touchcancel');
+					sortableElement.element.unbind('mousedown touchstart');
 				});
 
 				var handle = $element;
