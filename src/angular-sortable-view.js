@@ -88,6 +88,7 @@
 						return getSortableElements(mapKey);
 					}, function(collection){
 						isGrid = false;
+						if (!collection) return;
 						var array = collection.filter(function(item){
 							return !item.container;
 						}).map(function(item){
