@@ -1,6 +1,6 @@
 //
 // Copyright Kamil Pękala http://github.com/kamilkp
-// angular-sortable-view v0.0.17 2017/12/26
+// angular-sortable-view v0.0.18 2021/05/14
 //
 
 ;(function(window, angular){
@@ -455,10 +455,17 @@
 					opts = angular.extend({}, {
 						tolerance: 'pointer',
 						revert: 200,
-						containment: 'html'
+						containment: 'html',
+						positionFixedAnchor: null,
 					}, opts);
+
+					var positionFixedAnchorRect;
 					if(opts.containment){
 						var containmentRect = closestElement.call($element, opts.containment)[0].getBoundingClientRect();
+					}
+
+					if(opts.positionFixedAnchor) {
+						positionFixedAnchorRect = closestElement.call($element, opts.positionFixedAnchor)[0].getBoundingClientRect();
 					}
 
 					var target = $element;
@@ -502,8 +509,17 @@
 							if(targetLeft + helperRect.width > containmentRect.left + body.scrollLeft + containmentRect.width) // right boundary
 								targetLeft = containmentRect.left + body.scrollLeft + containmentRect.width - helperRect.width;
 						}
-						this.style.left = targetLeft - body.scrollLeft + 'px';
-						this.style.top = targetTop - body.scrollTop + 'px';
+
+						var left = targetLeft - body.scrollLeft;
+						var top = targetTop - body.scrollTop;
+
+						if (positionFixedAnchorRect) {
+							left -= positionFixedAnchorRect.left;
+							top -= positionFixedAnchorRect.top;
+						}
+
+						this.style.left = left + 'px';
+						this.style.top = top + 'px';
 					};
 
 					var pointerOffset = {
@@ -514,6 +530,7 @@
 					html.on('mousemove touchmove', onMousemove).on('mouseup touchend touchcancel', function mouseup(e){
 						html.off('mousemove touchmove', onMousemove);
 						html.off('mouseup touchend touchcancel', mouseup);
+
 						html.removeClass('sv-sorting-in-progress');
 						if(moveExecuted){
 							$controllers[0].$drop($scope.$index, opts);
