@@ -410,6 +410,7 @@
 				$controllers[1].addToSortableElements(sortableElement);
 				$scope.$on('$destroy', function(){
 					$controllers[1].removeFromSortableElements(sortableElement);
+					html.off('mousemove touchmove', onMousemove);
 				});
 
 				var handle = $element;
@@ -537,20 +538,20 @@
 						}
 						$element.removeClass('sv-visibility-hidden');
 					});
+				}
 
-					// onMousemove(e);
-					function onMousemove(e){
-						touchFix(e);
-						if(!moveExecuted){
-							$element.parent().prepend(clone);
-							moveExecuted = true;
-						}
-						$controllers[1].$moveUpdate(opts, {
-							x: e.clientX,
-							y: e.clientY,
-							offset: pointerOffset
-						}, clone, $element, placeholder, $controllers[0].getPart(), $scope.$index);
+				// onMousemove(e);
+				function onMousemove(e){
+					touchFix(e);
+					if(!moveExecuted){
+						$element.parent().prepend(clone);
+						moveExecuted = true;
 					}
+					$controllers[1].$moveUpdate(opts, {
+						x: e.clientX,
+						y: e.clientY,
+						offset: pointerOffset
+					}, clone, $element, placeholder, $controllers[0].getPart(), $scope.$index);
 				}
 			}
 		};
