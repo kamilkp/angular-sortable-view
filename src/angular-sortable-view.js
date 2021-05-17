@@ -52,16 +52,17 @@
 				var mapKey = $interpolate($attrs.svRoot)($scope) || $scope.$id;
 				if(!ROOTS_MAP[mapKey]) ROOTS_MAP[mapKey] = [];
 
-				var that         = this;
-				var candidates;  // set of possible destinations
-				var $placeholder;// placeholder element
-				var options;     // sortable options
-				var $helper;     // helper element - the one thats being dragged around with the mouse pointer
-				var $original;   // original element
-				var $target;     // last best candidate
-				var isGrid       = false;
-				var onSort       = $parse($attrs.svOnSort);
-
+				var that = this;
+				var candidates; // set of possible destinations
+				var $placeholder; // placeholder element
+				var options; // sortable options
+				var $helper; // helper element - the one thats being dragged around with the mouse pointer
+				var $original; // original element
+				var $target; // last best candidate
+				var isGrid = false;
+				var onSort = $parse($attrs.svOnSort);
+				var parentIsRelative = $attrs.hasRelativeParent ? $($attrs.hasRelativeParent) : false;
+				
 				// ----- hack due to https://github.com/angular/angular.js/issues/8044
 				$attrs.svOnStart = $attrs.$$element[0].attributes['sv-on-start'];
 				$attrs.svOnStart = $attrs.svOnStart && $attrs.svOnStart.value;
@@ -93,7 +94,7 @@
 						}).map(function(item){
 							return {
 								part: item.getPart().id,
-								y: item.element[0].getBoundingClientRect().top
+								y: !parentIsRelative ? item.element[0].getBoundingClientRect().top : (item.element[0].getBoundingClientRect().top - parentIsRelative.offset().top )
 							};
 						});
 						var dict = Object.create(null);
@@ -115,7 +116,18 @@
 						});
 					});
 				}
+				
+				this.relativeParentOffset = function() {
 
+                    		if (!parentIsRelative)
+		                        return {
+		                            top: 0,
+		                            left: 0
+		                        };
+
+		                    return $(parentIsRelative).offset();
+		                };
+				
 				this.$moveUpdate = function(opts, mouse, svElement, svOriginal, svPlaceholder, originatingPart, originatingIndex){
 					var svRect = svElement[0].getBoundingClientRect();
 					if(opts.tolerance === 'element')
@@ -162,8 +174,8 @@
 
 					// ----- move the element
 					$helper[0].reposition({
-						x: mouse.x + document.body.scrollLeft - mouse.offset.x*svRect.width,
-						y: mouse.y + document.body.scrollTop - mouse.offset.y*svRect.height
+						x: (mouse.x + document.body.scrollLeft - mouse.offset.x*svRect.width) - that.relativeParentOffset().left,
+                        			y: (mouse.y + document.body.scrollTop - mouse.offset.y*svRect.height) - that.relativeParentOffset().top
 					});
 
 					// ------ manage candidates
