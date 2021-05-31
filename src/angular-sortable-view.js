@@ -1,6 +1,6 @@
 //
 // Copyright Kamil Pękala http://github.com/kamilkp
-// angular-sortable-view v0.0.18 2021/05/14
+// angular-sortable-view v0.0.19 2021/05/31
 //
 
 ;(function(window, angular){
@@ -118,11 +118,10 @@
 
 				this.$moveUpdate = function(opts, mouse, svElement, svOriginal, svPlaceholder, originatingPart, originatingIndex){
 					var svRect = svElement[0].getBoundingClientRect();
-					if(opts.tolerance === 'element')
-						mouse = {
-							x: ~~(svRect.left + svRect.width/2),
-							y: ~~(svRect.top + svRect.height/2)
-						};
+					if(opts.tolerance === 'element') {
+						mouse.x = ~~(svRect.left + svRect.width/2);
+						mouse.y = ~~(svRect.top + svRect.height/2);
+					}
 
 					sortingInProgress = true;
 					candidates = [];
@@ -161,9 +160,13 @@
 					}
 
 					// ----- move the element
+					// $helper[0].reposition({
+					// 	x: mouse.x + document.body.scrollLeft + windowScrollX() - mouse.initialWindowScroll.x - mouse.offset.x*svRect.width,
+					// 	y: mouse.y + document.body.scrollTop + windowScrollY() - mouse.initialWindowScroll.y - mouse.offset.y*svRect.height
+					// });
 					$helper[0].reposition({
-						x: mouse.x + document.body.scrollLeft - mouse.offset.x*svRect.width,
-						y: mouse.y + document.body.scrollTop - mouse.offset.y*svRect.height
+						x: mouse.x + windowScrollX() - mouse.offset.x*svRect.width,
+						y: mouse.y + windowScrollY() - mouse.offset.y*svRect.height
 					});
 
 					// ------ manage candidates
@@ -455,7 +458,7 @@
 					opts = angular.extend({}, {
 						tolerance: 'pointer',
 						revert: 200,
-						containment: 'html',
+						containment: 'body',
 						positionFixedAnchor: null,
 					}, opts);
 
@@ -500,18 +503,18 @@
 						var body = document.body;
 
 						if(containmentRect){
-							if(targetTop < containmentRect.top + body.scrollTop) // top boundary
-								targetTop = containmentRect.top + body.scrollTop;
-							if(targetTop + helperRect.height > containmentRect.top + body.scrollTop + containmentRect.height) // bottom boundary
-								targetTop = containmentRect.top + body.scrollTop + containmentRect.height - helperRect.height;
-							if(targetLeft < containmentRect.left + body.scrollLeft) // left boundary
-								targetLeft = containmentRect.left + body.scrollLeft;
-							if(targetLeft + helperRect.width > containmentRect.left + body.scrollLeft + containmentRect.width) // right boundary
-								targetLeft = containmentRect.left + body.scrollLeft + containmentRect.width - helperRect.width;
+							if(targetTop < containmentRect.top + windowScrollY()) // top boundary
+								targetTop = containmentRect.top + windowScrollY();
+							if(targetTop + helperRect.height > containmentRect.top + windowScrollY() + containmentRect.height) // bottom boundary
+								targetTop = containmentRect.top + windowScrollY() + containmentRect.height - helperRect.height;
+							if(targetLeft < containmentRect.left + windowScrollX()) // left boundary
+								targetLeft = containmentRect.left + windowScrollX();
+							if(targetLeft + helperRect.width > containmentRect.left + windowScrollX() + containmentRect.width) // right boundary
+								targetLeft = containmentRect.left + windowScrollX() + containmentRect.width - helperRect.width;
 						}
 
-						var left = targetLeft - body.scrollLeft;
-						var top = targetTop - body.scrollTop;
+						var left = targetLeft - windowScrollX();
+						var top = targetTop - windowScrollY();
 
 						if (positionFixedAnchorRect) {
 							left -= positionFixedAnchorRect.left;
@@ -526,6 +529,12 @@
 						x: (e.clientX - clientRect.left)/clientRect.width,
 						y: (e.clientY - clientRect.top)/clientRect.height
 					};
+
+					var initialWindowScroll = {
+						x: windowScrollX(),
+						y: windowScrollY(),
+					};
+
 					html.addClass('sv-sorting-in-progress');
 					html.on('mousemove touchmove', onMousemove).on('mouseup touchend touchcancel', function mouseup(e){
 						html.off('mousemove touchmove', onMousemove);
@@ -548,7 +557,8 @@
 						$controllers[1].$moveUpdate(opts, {
 							x: e.clientX,
 							y: e.clientY,
-							offset: pointerOffset
+							offset: pointerOffset,
+							initialWindowScroll: initialWindowScroll
 						}, clone, $element, placeholder, $controllers[0].getPart(), $scope.$index);
 					}
 				}
@@ -649,6 +659,14 @@
 			element.parent().prepend(newElement);
 		}
 	}
+
+	function windowScrollX() {
+    return 'scrollX' in window ? window.scrollX : document[0].documentElement.scrollLeft;
+  }
+
+  function windowScrollY() {
+    return 'scrollY' in window ? window.scrollY : document[0].documentElement.scrollTop;
+  }
 
 	var dde = document.documentElement,
 	matchingFunction = dde.matches ? 'matches' :
