@@ -1,6 +1,6 @@
 //
 // Copyright Kamil Pękala http://github.com/kamilkp
-// angular-sortable-view v0.0.20 2021/06/02
+// angular-sortable-view v0.0.21 2021/06/02
 //
 
 ;(function(window, angular){
@@ -391,7 +391,7 @@
 		};
 	}]);
 
-	module.directive('svElement', ['$parse', function($parse){
+	module.directive('svElement', ['$parse', '$window', function($parse, $window){
 		return {
 			restrict: 'A',
 			require: ['^svPart', '^svRoot'],
@@ -437,6 +437,7 @@
 
 				var body = angular.element(document.body);
 				var html = angular.element(document.documentElement);
+				var windowElement = angular.element($window);
 
 				var moveExecuted;
 
@@ -531,10 +532,15 @@
 						y: windowScrollY(),
 					};
 
+					var lastMoveEvent = null;
+
 					html.addClass('sv-sorting-in-progress');
+					windowElement.on('scroll', onWindowScroll);
 					html.on('mousemove touchmove', onMousemove).on('mouseup touchend touchcancel', function mouseup(e){
 						html.off('mousemove touchmove', onMousemove);
 						html.off('mouseup touchend touchcancel', mouseup);
+						windowElement.off('scroll', onWindowScroll);
+						lastMoveEvent = null
 
 						html.removeClass('sv-sorting-in-progress');
 						if(moveExecuted){
@@ -556,6 +562,14 @@
 							offset: pointerOffset,
 							initialWindowScroll: initialWindowScroll
 						}, clone, $element, placeholder, $controllers[0].getPart(), $scope.$index);
+
+						lastMoveEvent = e;
+					}
+
+					function onWindowScroll() {
+						if (lastMoveEvent) {
+							onMousemove(lastMoveEvent);
+						}
 					}
 				}
 			}
