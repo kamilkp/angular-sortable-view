@@ -1,6 +1,6 @@
 //
 // Copyright Kamil Pękala http://github.com/kamilkp
-// angular-sortable-view v0.0.19 2021/05/31
+// angular-sortable-view v0.0.20 2021/06/02
 //
 
 ;(function(window, angular){
@@ -160,13 +160,9 @@
 					}
 
 					// ----- move the element
-					// $helper[0].reposition({
-					// 	x: mouse.x + document.body.scrollLeft + windowScrollX() - mouse.initialWindowScroll.x - mouse.offset.x*svRect.width,
-					// 	y: mouse.y + document.body.scrollTop + windowScrollY() - mouse.initialWindowScroll.y - mouse.offset.y*svRect.height
-					// });
 					$helper[0].reposition({
-						x: mouse.x + windowScrollX() - mouse.offset.x*svRect.width,
-						y: mouse.y + windowScrollY() - mouse.offset.y*svRect.height
+						x: mouse.x + 2 * windowScrollX() - mouse.initialWindowScroll.x - mouse.offset.x*svRect.width,
+						y: mouse.y + 2 * windowScrollY() - mouse.initialWindowScroll.y - mouse.offset.y*svRect.height
 					});
 
 					// ------ manage candidates
